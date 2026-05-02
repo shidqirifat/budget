@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -31,20 +32,74 @@ async function main() {
     });
 
     for (const cat of SEED_DATA[typeName]) {
-      const category = await prisma.category.upsert({
-        where: { name_typeId_userId: { name: cat.name, typeId: type.id, userId: null } },
-        update: {},
-        create: { name: cat.name, typeId: type.id, userId: null },
+      const existing = await prisma.category.findFirst({
+        where: { name: cat.name, typeId: type.id, userId: null },
+      });
+      const category = existing ?? await prisma.category.create({
+        data: { name: cat.name, typeId: type.id, userId: null },
       });
 
       for (const subName of cat.subs) {
-        await prisma.subCategory.upsert({
-          where: { name_categoryId_userId: { name: subName, categoryId: category.id, userId: null } },
-          update: {},
-          create: { name: subName, categoryId: category.id, userId: null },
+        const existingSub = await prisma.subCategory.findFirst({
+          where: { name: subName, categoryId: category.id, userId: null },
         });
+        if (!existingSub) {
+          await prisma.subCategory.create({
+            data: { name: subName, categoryId: category.id, userId: null },
+          });
+        }
       }
     }
+  }
+
+  // Seed user
+  const hashedPassword = await bcrypt.hash('Password123*', 10);
+  const user = await prisma.user.upsert({
+    where: { email: 'shidqi@example.com' },
+    update: {},
+    create: { email: 'shidqi@example.com', name: 'Shidqi', password: hashedPassword },
+  });
+
+  // Seed sample transactions for the user
+  const incomeType = await prisma.transactionType.findUnique({ where: { name: 'income' } });
+  const expenseType = await prisma.transactionType.findUnique({ where: { name: 'expense' } });
+  const salaryCategory = await prisma.category.findFirst({ where: { name: 'Salary', userId: null } });
+  const salarySubCat = await prisma.subCategory.findFirst({ where: { name: 'Base Salary', userId: null } });
+  const foodCategory = await prisma.category.findFirst({ where: { name: 'Food & Drink', userId: null } });
+  const foodSubCat = await prisma.subCategory.findFirst({ where: { name: 'Restaurant', userId: null } });
+
+  if (incomeType && salaryCategory && salarySubCat) {
+    await prisma.transaction.createMany({
+      data: [
+        {
+          amount: 10000000,
+          typeId: incomeType.id,
+          categoryId: salaryCategory.id,
+          subCategoryId: salarySubCat.id,
+          date: new Date('2025-04-01'),
+          note: 'April salary',
+          userId: user.id,
+        },
+      ],
+      skipDuplicates: true,
+    });
+  }
+
+  if (expenseType && foodCategory && foodSubCat) {
+    await prisma.transaction.createMany({
+      data: [
+        {
+          amount: 85000,
+          typeId: expenseType.id,
+          categoryId: foodCategory.id,
+          subCategoryId: foodSubCat.id,
+          date: new Date('2025-04-05'),
+          note: 'Lunch with team',
+          userId: user.id,
+        },
+      ],
+      skipDuplicates: true,
+    });
   }
 
   console.log('Seed complete');
