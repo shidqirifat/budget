@@ -1,53 +1,121 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import MonthNav, { MONTH_LABELS } from '@/components/MonthNav';
-import {
-  CATEGORIES_DATA, TRANSACTIONS_DATA, Transaction,
-  formatRp, groupByDate, getCategoryById, parseDateInfo,
-} from '@/utils/designData';
+import dayjs from '@/utils/dayjs';
+import MonthNav from '@/components/MonthNav';
+import { transactionService, Transaction } from '@/services/transaction.service';
+import { categoryService, Category } from '@/services/category.service';
+import { formatCurrency } from '@/utils/format';
+
+
+function parseDateInfo(dateStr: string) {
+  const d = dayjs(dateStr);
+  return {
+    day:     d.date(),
+    dayName: d.format('dddd'),
+    month:   d.format('MMMM'),
+    year:    d.year(),
+  };
+}
+
+function getMonthRange(month: string): { from: string; to: string } {
+  const d = dayjs(month + '-01');
+  return {
+    from: d.startOf('month').format('YYYY-MM-DD'),
+    to:   d.endOf('month').format('YYYY-MM-DD'),
+  };
+}
+
+function txAmount(tx: Transaction): number {
+  return tx.type.name === 'income' ? tx.amount : -tx.amount;
+}
+
+function groupByDate(txs: Transaction[]): [string, Transaction[]][] {
+  const groups: Record<string, Transaction[]> = {};
+  txs.forEach(tx => {
+    const date = tx.date.slice(0, 10);
+    if (!groups[date]) groups[date] = [];
+    groups[date].push(tx);
+  });
+  return Object.entries(groups).sort(([a], [b]) => b.localeCompare(a));
+}
+
+function currentMonthKey() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
 
 export default function TransactionsPage() {
   const navigate = useNavigate();
+  const [month,       setMonth]       = useState(currentMonthKey);
   const [search,      setSearch]      = useState('');
-  const [month,       setMonth]       = useState('2026-04');
-  const [filterCat,   setFilterCat]   = useState('');
-  const [filterSub,   setFilterSub]   = useState('');
+  const [filterCatId, setFilterCatId] = useState('');
+  const [filterSubId, setFilterSubId] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
-  const currentMonth = TRANSACTIONS_DATA.filter(tx => tx.date.startsWith(month));
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [categories,   setCategories]   = useState<Category[]>([]);
+  const [loading,      setLoading]      = useState(false);
 
-  const filtered = currentMonth.filter(tx => {
-    const cat = getCategoryById(tx.categoryId);
+  useEffect(() => {
+    categoryService.getAll().then(r => setCategories(r.data.data)).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    const { from, to } = getMonthRange(month);
+    transactionService.getAll({ from, to })
+      .then(r => setTransactions(r.data.data))
+      .catch(() => setTransactions([]))
+      .finally(() => setLoading(false));
+  }, [month]);
+
+  const filtered = useMemo(() => transactions.filter(tx => {
     const q = search.toLowerCase();
     const matchSearch = !q
-      || tx.desc.toLowerCase().includes(q)
-      || (cat?.name || '').toLowerCase().includes(q)
-      || tx.sub.toLowerCase().includes(q);
-    const matchCat = !filterCat || cat?.name === filterCat;
-    const matchSub = !filterSub || tx.sub === filterSub;
+      || tx.category.name.toLowerCase().includes(q)
+      || (tx.subCategory?.name || '').toLowerCase().includes(q)
+      || (tx.note || '').toLowerCase().includes(q);
+    const matchCat = !filterCatId || tx.categoryId === filterCatId;
+    const matchSub = !filterSubId || tx.subCategoryId === filterSubId;
     return matchSearch && matchCat && matchSub;
-  });
+  }), [transactions, search, filterCatId, filterSubId]);
 
-  const inflow  = filtered.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0);
-  const outflow = filtered.filter(t => t.amount < 0).reduce((s, t) => s + t.amount, 0);
-  const net     = inflow + outflow;
+  const inflow  = filtered.reduce((s, t) => t.type.name === 'income' ? s + t.amount : s, 0);
+  const outflow = filtered.reduce((s, t) => t.type.name === 'expense' ? s + t.amount : s, 0);
+  const net     = inflow - outflow;
   const groups  = groupByDate(filtered);
 
-  const catOptions = [...new Set(
-    currentMonth.map(tx => getCategoryById(tx.categoryId)?.name).filter(Boolean)
-  )] as string[];
+  const catOptions = useMemo(() => {
+    const ids = new Set(transactions.map(t => t.categoryId));
+    return categories.filter(c => ids.has(c.id));
+  }, [transactions, categories]);
 
-  const subOptions = filterCat
-    ? [...new Set(
-        currentMonth
-          .filter(tx => getCategoryById(tx.categoryId)?.name === filterCat)
-          .map(tx => tx.sub).filter(Boolean)
-      )]
-    : [];
+  const subOptions = useMemo(() => {
+    if (!filterCatId) return [];
+    const ids = new Set(
+      transactions
+        .filter(t => t.categoryId === filterCatId && t.subCategoryId)
+        .map(t => t.subCategoryId!)
+    );
+    const seen = new Set<string>();
+    const result: { id: string; name: string }[] = [];
+    transactions.forEach(t => {
+      if (t.categoryId === filterCatId && t.subCategory && ids.has(t.subCategoryId!) && !seen.has(t.subCategoryId!)) {
+        seen.add(t.subCategoryId!);
+        result.push({ id: t.subCategoryId!, name: t.subCategory.name });
+      }
+    });
+    return result;
+  }, [transactions, filterCatId]);
 
-  const hasFilter = !!filterCat || !!filterSub;
-  const activeFilterCount = (filterCat ? 1 : 0) + (filterSub ? 1 : 0);
-  const clearFilters = () => { setFilterCat(''); setFilterSub(''); };
+  const hasFilter        = !!filterCatId || !!filterSubId;
+  const activeFilterCount = (filterCatId ? 1 : 0) + (filterSubId ? 1 : 0);
+  const clearFilters     = () => { setFilterCatId(''); setFilterSubId(''); };
+
+  const filterCatName = categories.find(c => c.id === filterCatId)?.name ?? '';
+  const filterSubName = subOptions.find(s => s.id === filterSubId)?.name ?? '';
+
+  const monthLabel = dayjs(month + '-01').format('MMMM YYYY');
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#F5F5F2', overflow: 'hidden' }}>
@@ -56,7 +124,7 @@ export default function TransactionsPage() {
       <div style={{ padding: '28px 32px 0', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexShrink: 0 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: '#111', margin: 0, letterSpacing: '-0.02em' }}>Transactions</h1>
-          <p style={{ fontSize: 13, color: '#999', margin: '3px 0 0' }}>{MONTH_LABELS[month]}</p>
+          <p style={{ fontSize: 13, color: '#999', margin: '3px 0 0' }}>{monthLabel}</p>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <MonthNav month={month} setMonth={setMonth} />
@@ -113,31 +181,31 @@ export default function TransactionsPage() {
             <span style={{ fontSize: 11, fontWeight: 600, color: '#aaa', letterSpacing: '0.07em', whiteSpace: 'nowrap' }}>FILTER BY</span>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
               <span style={{ fontSize: 10, fontWeight: 600, color: '#bbb', letterSpacing: '0.06em' }}>CATEGORY</span>
-              <select value={filterCat} onChange={e => { setFilterCat(e.target.value); setFilterSub(''); }}
-                style={{ padding: '8px 12px', borderRadius: 8, border: `1.5px solid ${filterCat ? '#D1FF19' : '#E5E5E0'}`, fontSize: 13, color: filterCat ? '#111' : '#aaa', outline: 'none', background: 'white', cursor: 'pointer' }}>
+              <select value={filterCatId} onChange={e => { setFilterCatId(e.target.value); setFilterSubId(''); }}
+                style={{ padding: '8px 12px', borderRadius: 8, border: `1.5px solid ${filterCatId ? '#D1FF19' : '#E5E5E0'}`, fontSize: 13, color: filterCatId ? '#111' : '#aaa', outline: 'none', background: 'white', cursor: 'pointer' }}>
                 <option value="">All categories</option>
-                {catOptions.map(c => <option key={c} value={c}>{c}</option>)}
+                {catOptions.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
               <span style={{ fontSize: 10, fontWeight: 600, color: '#bbb', letterSpacing: '0.06em' }}>SUB-CATEGORY</span>
-              <select value={filterSub} onChange={e => setFilterSub(e.target.value)} disabled={!filterCat}
-                style={{ padding: '8px 12px', borderRadius: 8, border: `1.5px solid ${filterSub ? '#D1FF19' : '#E5E5E0'}`, fontSize: 13, color: filterSub ? '#111' : '#aaa', outline: 'none', background: filterCat ? 'white' : '#F8F8F8', cursor: filterCat ? 'pointer' : 'not-allowed', opacity: filterCat ? 1 : 0.5 }}>
+              <select value={filterSubId} onChange={e => setFilterSubId(e.target.value)} disabled={!filterCatId}
+                style={{ padding: '8px 12px', borderRadius: 8, border: `1.5px solid ${filterSubId ? '#D1FF19' : '#E5E5E0'}`, fontSize: 13, color: filterSubId ? '#111' : '#aaa', outline: 'none', background: filterCatId ? 'white' : '#F8F8F8', cursor: filterCatId ? 'pointer' : 'not-allowed', opacity: filterCatId ? 1 : 0.5 }}>
                 <option value="">All sub-categories</option>
-                {subOptions.map(s => <option key={s} value={s}>{s}</option>)}
+                {subOptions.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', flex: 2 }}>
-              {filterCat && (
+              {filterCatId && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 20, background: '#111', color: '#D1FF19', fontSize: 12, fontWeight: 600 }}>
-                  {filterCat}
-                  <span onClick={() => { setFilterCat(''); setFilterSub(''); }} style={{ cursor: 'pointer', opacity: 0.7 }}>✕</span>
+                  {filterCatName}
+                  <span onClick={() => { setFilterCatId(''); setFilterSubId(''); }} style={{ cursor: 'pointer', opacity: 0.7 }}>✕</span>
                 </div>
               )}
-              {filterSub && (
+              {filterSubId && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 20, background: '#F0F0E8', color: '#555', fontSize: 12 }}>
-                  {filterSub}
-                  <span onClick={() => setFilterSub('')} style={{ cursor: 'pointer', opacity: 0.7 }}>✕</span>
+                  {filterSubName}
+                  <span onClick={() => setFilterSubId('')} style={{ cursor: 'pointer', opacity: 0.7 }}>✕</span>
                 </div>
               )}
               {hasFilter && (
@@ -162,7 +230,9 @@ export default function TransactionsPage() {
             <div key={i} style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
               <div style={{ flex: 1, textAlign: i === 0 ? 'left' : i === 2 ? 'right' : 'center' }}>
                 <div style={{ fontSize: 10, fontWeight: 600, color: '#bbb', letterSpacing: '0.08em', marginBottom: 5 }}>{item.label}</div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: item.color, letterSpacing: '-0.02em' }}>{formatRp(item.value)}</div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: item.color, letterSpacing: '-0.02em' }}>
+                  {i === 1 ? '-' : ''}{formatCurrency(item.value)}
+                </div>
               </div>
               {i < 2 && <div style={{ width: 1, height: 40, background: '#F0F0EA', margin: '0 32px' }}/>}
             </div>
@@ -172,12 +242,15 @@ export default function TransactionsPage() {
 
       {/* Transaction groups */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '14px 32px 80px' }}>
-        {groups.length === 0 && (
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: '#bbb', fontSize: 14 }}>Loading…</div>
+        )}
+        {!loading && groups.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 0', color: '#bbb', fontSize: 14 }}>No transactions found.</div>
         )}
-        {groups.map(([date, txs]) => {
-          const { day, dayName, month: mName } = parseDateInfo(date);
-          const dayTotal = (txs as Transaction[]).reduce((s, t) => s + t.amount, 0);
+        {!loading && groups.map(([date, txs]) => {
+          const { day, dayName, month: mName, year } = parseDateInfo(date);
+          const dayTotal = txs.reduce((s, t) => s + txAmount(t), 0);
           return (
             <div key={date} style={{ marginBottom: 12, borderRadius: 10, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 20px', background: '#EEEEE8' }}>
@@ -185,14 +258,16 @@ export default function TransactionsPage() {
                   <span style={{ fontSize: 26, fontWeight: 700, color: '#111', letterSpacing: '-0.03em' }}>{String(day).padStart(2, '0')}</span>
                   <div>
                     <div style={{ fontSize: 12, fontWeight: 600, color: '#555' }}>{dayName}</div>
-                    <div style={{ fontSize: 11, color: '#aaa' }}>{mName} {new Date(date + 'T00:00:00').getFullYear()}</div>
+                    <div style={{ fontSize: 11, color: '#aaa' }}>{mName} {year}</div>
                   </div>
                 </div>
-                <span style={{ fontSize: 14, fontWeight: 700, color: dayTotal < 0 ? '#E05C5C' : '#2A9D5C' }}>{formatRp(dayTotal)}</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: dayTotal < 0 ? '#E05C5C' : '#2A9D5C' }}>
+                  {dayTotal < 0 ? '-' : '+'}{formatCurrency(Math.abs(dayTotal))}
+                </span>
               </div>
-              {(txs as Transaction[]).map((tx, i) => {
-                const cat = getCategoryById(tx.categoryId);
-                const isLast = i === txs.length - 1;
+              {txs.map((tx, i) => {
+                const isLast  = i === txs.length - 1;
+                const signed  = txAmount(tx);
                 return (
                   <div key={tx.id}
                     onClick={() => navigate('/add-transaction', { state: { editingTx: tx } })}
@@ -200,16 +275,18 @@ export default function TransactionsPage() {
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#F5FFF0'}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? 'white' : '#FAFAF7'}
                   >
-                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: cat?.bg || '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
-                      {cat?.icon}
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#F0F0EE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, color: '#888', flexShrink: 0 }}>
+                      {tx.category.name.slice(0, 1).toUpperCase()}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>{cat?.name}</div>
-                      <div style={{ fontSize: 12, color: '#999', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tx.desc}</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>{tx.category.name}</div>
+                      <div style={{ fontSize: 12, color: '#999', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tx.note || '—'}</div>
                     </div>
-                    <div style={{ padding: '3px 10px', borderRadius: 20, background: '#F2F2EE', fontSize: 11, color: '#888', flexShrink: 0 }}>{tx.sub}</div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: tx.amount < 0 ? '#E05C5C' : '#2A9D5C', flexShrink: 0, minWidth: 140, textAlign: 'right', letterSpacing: '-0.01em' }}>
-                      {formatRp(tx.amount)}
+                    {tx.subCategory && (
+                      <div style={{ padding: '3px 10px', borderRadius: 20, background: '#F2F2EE', fontSize: 11, color: '#888', flexShrink: 0 }}>{tx.subCategory.name}</div>
+                    )}
+                    <div style={{ fontSize: 14, fontWeight: 700, color: signed < 0 ? '#E05C5C' : '#2A9D5C', flexShrink: 0, minWidth: 140, textAlign: 'right', letterSpacing: '-0.01em' }}>
+                      {signed < 0 ? '-' : '+'}{formatCurrency(Math.abs(signed))}
                     </div>
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0, opacity: 0.3 }}>
                       <path d="M5 3l4 4-4 4" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>

@@ -1,25 +1,35 @@
-const MONTH_LIST = [
+import dayjs from '@/utils/dayjs';
+
+// Legacy exports kept for AnalyticsPage until it is fully integrated
+export const MONTH_LIST = [
   '2025-11','2025-12','2026-01','2026-02','2026-03','2026-04','2026-05','2026-06',
 ];
+export const MONTH_LABELS: Record<string, string> = Object.fromEntries(
+  MONTH_LIST.map(m => [m, dayjs(m + '-01').format('MMMM YYYY')])
+);
 
-export const MONTH_LABELS: Record<string, string> = {
-  '2025-11': 'November 2025', '2025-12': 'December 2025',
-  '2026-01': 'January 2026',  '2026-02': 'February 2026',
-  '2026-03': 'March 2026',    '2026-04': 'April 2026',
-  '2026-05': 'May 2026',      '2026-06': 'June 2026',
-};
+function addMonths(month: string, delta: number): string {
+  return dayjs(month + '-01').add(delta, 'month').format('YYYY-MM');
+}
 
-export { MONTH_LIST };
+function monthLabel(month: string): string {
+  return dayjs(month + '-01').format('MMMM YYYY');
+}
+
+function currentMonthKey(): string {
+  return dayjs().format('YYYY-MM');
+}
 
 interface Props {
   month: string;
   setMonth: (m: string) => void;
+  minMonth?: string;
+  maxMonth?: string;
 }
 
-export default function MonthNav({ month, setMonth }: Props) {
-  const idx = MONTH_LIST.indexOf(month);
-  const canPrev = idx > 0;
-  const canNext = idx < MONTH_LIST.length - 1;
+export default function MonthNav({ month, setMonth, minMonth, maxMonth = currentMonthKey() }: Props) {
+  const canPrev = !minMonth || month > minMonth;
+  const canNext = month < maxMonth;
 
   const btn = (enabled: boolean, dir: string, onClick: () => void) => (
     <button onClick={onClick} disabled={!enabled} style={{
@@ -31,11 +41,11 @@ export default function MonthNav({ month, setMonth }: Props) {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'white', border: '1px solid #E5E5E0', borderRadius: 8, padding: '6px 10px' }}>
-      {btn(canPrev, '‹', () => setMonth(MONTH_LIST[idx - 1]))}
+      {btn(canPrev, '‹', () => setMonth(addMonths(month, -1)))}
       <span style={{ fontSize: 13, fontWeight: 600, color: '#333', minWidth: 110, textAlign: 'center' }}>
-        {MONTH_LABELS[month] ?? month}
+        {monthLabel(month)}
       </span>
-      {btn(canNext, '›', () => setMonth(MONTH_LIST[idx + 1]))}
+      {btn(canNext, '›', () => setMonth(addMonths(month, 1)))}
     </div>
   );
 }

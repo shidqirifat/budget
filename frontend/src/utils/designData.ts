@@ -50,15 +50,14 @@ export const groupByDate = (txs: Transaction[]) => {
 
 export const getCategoryById = (id: number) => CATEGORIES_DATA.find(c => c.id === id);
 
-export const MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-export const DAYS_ID   = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+import dayjs from '@/utils/dayjs';
 
 export const parseDateInfo = (dateStr: string) => {
-  const d = new Date(dateStr + 'T00:00:00');
+  const d = dayjs(dateStr);
   return {
-    day:     d.getDate(),
-    dayName: DAYS_ID[d.getDay()],
-    month:   MONTHS_ID[d.getMonth()],
-    year:    d.getFullYear(),
+    day:     d.date(),
+    dayName: d.format('dddd'),
+    month:   d.format('MMMM'),
+    year:    d.year(),
   };
 };

@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { TRANSACTIONS_DATA, Transaction, formatRp, getCategoryById, parseDateInfo, MONTHS_ID } from '@/utils/designData';
+import dayjs from '@/utils/dayjs';
+import { TRANSACTIONS_DATA, Transaction, formatRp, getCategoryById, parseDateInfo } from '@/utils/designData';
 
 type BudgetEvent = {
   id: number; name: string; icon: string; color: string; bg: string;
@@ -70,8 +71,7 @@ export default function EventsPage() {
 
   const formatDate = (d: string) => {
     if (!d) return '—';
-    const dt = new Date(d + 'T00:00:00');
-    return `${dt.getDate()} ${MONTHS_ID[dt.getMonth()]} ${dt.getFullYear()}`;
+    return dayjs(d).format('D MMMM YYYY');
   };
 
   const sectionHead = (label: string) => (
@@ -204,7 +204,7 @@ export default function EventsPage() {
                     {[
                       { label: 'MONTH OUTFLOW', value: formatRp(-monthOutflow), color: '#888' },
                       { label: 'EVENT SPEND',   value: formatRp(-eventOutflow), color: '#E05C5C' },
-                      { label: 'CONTRIBUTION',  value: `${contributionPct}%`,  color: '#E8A040', sub: `of ${MONTHS_ID[new Date(selected.startDate + 'T00:00:00').getMonth()]} outflow` },
+                      { label: 'CONTRIBUTION',  value: `${contributionPct}%`,  color: '#E8A040', sub: `of ${dayjs(selected.startDate).format('MMMM')} outflow` },
                     ].map((item, i) => (
                       <div key={i} style={{ flex: 1, background: '#F9F9F7', borderRadius: 10, padding: '14px 16px', border: '1px solid #F0F0EA' }}>
                         <div style={{ fontSize: 9, fontWeight: 600, color: '#bbb', letterSpacing: '0.08em', marginBottom: 6 }}>{item.label}</div>
