@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  name          String?
+  password      String
+  transactions  Transaction[]
+  categories    Category[]
+  subCategories SubCategory[]
+  events        Event[]
+  createdAt     DateTime      @default(now())
+}
+
+model TransactionType {
+  id           String        @id @default(cuid())
+  name         String        @unique
+  transactions Transaction[]
+  categories   Category[]
+}
+
+model Category {
+  id            String          @id @default(cuid())
+  name          String
+  typeId        String
+  type          TransactionType @relation(fields: [typeId], references: [id])
+  userId        String?
+  user          User?           @relation(fields: [userId], references: [id])
+  subCategories SubCategory[]
+  transactions  Transaction[]
+  createdAt     DateTime        @default(now())
+
+  @@unique([name, typeId, userId])
+}
+
+model SubCategory {
+  id           String        @id @default(cuid())
+  name         String
+  categoryId   String
+  category     Category      @relation(fields: [categoryId], references: [id])
+  userId       String?
+  user         User?         @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+
+  @@unique([name, categoryId, userId])
+}
+
+model Event {
+  id           String        @id @default(cuid())
+  name         String
+  description  String?
+  startDate    DateTime
+  endDate      DateTime?
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Transaction {
+  id            String          @id @default(cuid())
+  amount        Float
+  typeId        String
+  type          TransactionType @relation(fields: [typeId], references: [id])
+  categoryId    String
+  category      Category        @relation(fields: [categoryId], references: [id])
+  subCategoryId String?
+  subCategory   SubCategory?    @relation(fields: [subCategoryId], references: [id])
+  eventId       String?
+  event         Event?          @relation(fields: [eventId], references: [id])
+  date          DateTime
+  note          String?
+  userId        String
+  user          User            @relation(fields: [userId], references: [id])
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
