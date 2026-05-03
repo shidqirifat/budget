@@ -204,12 +204,7 @@ export default function Sidebar({ onWidthChange, onTopbarHeight }: SidebarProps)
       style={{ padding: '24px 20px 16px', display: 'flex', alignItems: 'center', gap: showText ? 12 : 0, justifyContent: showText ? 'flex-start' : 'center', cursor: 'pointer' }}
       onClick={handleLogoClick}
     >
-      <div style={{
-        width: 36, height: 36, background: '#D1FF19', borderRadius: 8,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontWeight: 800, fontSize: 18, color: '#111', flexShrink: 0,
-        userSelect: 'none',
-      }}>B</div>
+      <img src="/logo.png" alt="Budget" style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
       {showText && (
         <span style={{ color: 'white', fontWeight: 700, fontSize: 16, letterSpacing: '-0.01em' }}>Budget</span>
       )}
@@ -242,15 +237,12 @@ export default function Sidebar({ onWidthChange, onTopbarHeight }: SidebarProps)
           borderBottom: '1px solid #EEEEE8',
         }}>
           {!drawerOpen && (
-            <div
+            <img
+              src="/logo.png"
+              alt="Budget"
               onClick={handleLogoClick}
-              style={{
-                width: 36, height: 36, background: '#D1FF19', borderRadius: 8,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: 800, fontSize: 18, color: '#111',
-                cursor: 'pointer', userSelect: 'none',
-              }}
-            >B</div>
+              style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'cover', cursor: 'pointer' }}
+            />
           )}
         </div>
       )}

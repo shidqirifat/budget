@@ -31,7 +31,7 @@ export default function LoginPage() {
       <div style={{ width: 400 }}>
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 40 }}>
-          <div style={{ width: 40, height: 40, background: '#D1FF19', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 20, color: '#111' }}>B</div>
+          <img src="/logo.png" alt="Budget" style={{ width: 40, height: 40, borderRadius: 10, objectFit: 'cover' }} />
           <span style={{ fontWeight: 700, fontSize: 20, color: '#111', letterSpacing: '-0.02em' }}>Budget</span>
         </div>
 
