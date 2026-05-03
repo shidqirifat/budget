@@ -25,9 +25,52 @@ export interface TransactionPayload {
   note?: string;
 }
 
+export interface AnalyticsMonthly {
+  month: string;
+  inflow: number;
+  outflow: number;
+}
+
+export interface AnalyticsCategorySub {
+  name: string;
+  amount: number;
+}
+
+export interface AnalyticsCategory {
+  categoryId: string;
+  name: string;
+  amount: number;
+  prevAmount: number;
+  subs: AnalyticsCategorySub[];
+}
+
+export interface AnalyticsCategoryDiff {
+  categoryId: string;
+  name: string;
+  current: number;
+  prev: number;
+  diff: number;
+}
+
+export interface AnalyticsInsights {
+  mostExpenseCategory: { name: string; amount: number } | null;
+  mostFrequentExpense: { name: string; count: number } | null;
+  mostIncomeCategory: { name: string; amount: number } | null;
+  expenseDiff: AnalyticsCategoryDiff[];
+  incomeDiff: AnalyticsCategoryDiff[];
+}
+
+export interface AnalyticsData {
+  monthly: AnalyticsMonthly[];
+  categoryBreakdown: AnalyticsCategory[];
+  incomeBreakdown: AnalyticsCategory[];
+  insights: AnalyticsInsights;
+}
+
 export const transactionService = {
   getAll: (params?: Record<string, string>) => api.get<{ data: Transaction[] }>('/transactions', { params }),
   getSummary: (params?: Record<string, string>) => api.get<{ data: { totalIncome: number; totalExpense: number; balance: number } }>('/transactions/summary', { params }),
+  getAnalytics: (month: string) => api.get<{ data: AnalyticsData }>('/transactions/analytics', { params: { month } }),
   create: (data: TransactionPayload) => api.post<{ data: Transaction }>('/transactions', data),
   update: (id: string, data: Partial<TransactionPayload>) => api.put<{ data: Transaction }>(`/transactions/${id}`, data),
   remove: (id: string) => api.delete(`/transactions/${id}`),
