@@ -29,6 +29,7 @@ model TransactionType {
 model Category {
   id            String          @id @default(cuid())
   name          String
+  icon          String?
   typeId        String
   type          TransactionType @relation(fields: [typeId], references: [id])
   userId        String?
@@ -43,6 +44,7 @@ model Category {
 model SubCategory {
   id           String        @id @default(cuid())
   name         String
+  icon         String?
   categoryId   String
   category     Category      @relation(fields: [categoryId], references: [id])
   userId       String?
