@@ -260,7 +260,6 @@ const MiniBar = ({ stats }: { stats: CategoryStats | null }) => {
   );
 };
 
-
 export default function CategoriesPage() {
   const [cats, setCats] = useState<Category[]>([]);
   const [subs, setSubs] = useState<SubCategory[]>([]);
@@ -619,7 +618,6 @@ export default function CategoriesPage() {
               .filter((c) => c.type.name === activeTab)
               .map((cat) => {
                 const active = selectedId === cat.id;
-                const isSystem = cat.userId === null;
                 return (
                   <div
                     key={cat.id}
@@ -661,9 +659,12 @@ export default function CategoriesPage() {
                         {cat.name}
                       </div>
                       <div
-                        style={{ fontSize: 11, color: "#bbb", marginTop: 1 }}
+                        style={{ fontSize: 11, color: "#bbb", marginTop: 2 }}
                       >
-                        {isSystem ? "System" : "Custom"}
+                        {cat._count?.subCategories &&
+                        cat._count.subCategories > 0
+                          ? `${cat._count.subCategories} sub-categories`
+                          : null}
                       </div>
                     </div>
                   </div>

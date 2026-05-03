@@ -7,6 +7,7 @@ export interface Category {
   typeId: string;
   userId: string | null;
   type: { id: string; name: string };
+  _count?: { subCategories: number };
 }
 
 export interface SubCategory {

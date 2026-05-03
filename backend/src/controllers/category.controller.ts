@@ -10,7 +10,7 @@ export async function getAll(req: AuthRequest, res: Response, next: NextFunction
         ...(typeId ? { typeId: String(typeId) } : {}),
         OR: [{ userId: null }, { userId: req.userId }],
       },
-      include: { type: true },
+      include: { type: true, _count: { select: { subCategories: true } } },
       orderBy: { name: 'asc' },
     });
     res.json({ data: categories });
