@@ -9,6 +9,7 @@ import subCategoryRoutes from './routes/sub-category.routes';
 import eventRoutes from './routes/event.routes';
 import transactionRoutes from './routes/transaction.routes';
 import { errorHandler } from './middleware/error.middleware';
+import { startTelegramBot } from './telegram/bot';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -27,4 +28,5 @@ app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  startTelegramBot();
 });

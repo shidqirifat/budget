@@ -8,15 +8,16 @@ datasource db {
 }
 
 model User {
-  id            String        @id @default(cuid())
-  email         String        @unique
-  name          String?
-  password      String
-  transactions  Transaction[]
-  categories    Category[]
-  subCategories SubCategory[]
-  events        Event[]
-  createdAt     DateTime      @default(now())
+  id             String        @id @default(cuid())
+  email          String        @unique
+  name           String?
+  password       String
+  telegramChatId String?       @unique
+  transactions   Transaction[]
+  categories     Category[]
+  subCategories  SubCategory[]
+  events         Event[]
+  createdAt      DateTime      @default(now())
 }
 
 model TransactionType {
