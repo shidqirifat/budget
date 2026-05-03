@@ -31,13 +31,7 @@ export const TRANSACTIONS_DATA = [
 export type Transaction = typeof TRANSACTIONS_DATA[number];
 export type Category = typeof CATEGORIES_DATA[number];
 
-export const formatRp = (amount: number): string => {
-  const abs = Math.abs(amount);
-  const str = abs.toLocaleString('id-ID');
-  if (amount < 0) return `-Rp ${str}`;
-  if (amount > 0) return `Rp ${str}`;
-  return 'Rp 0';
-};
+export { formatCurrency as formatRp } from '@/utils/format';
 
 export const groupByDate = (txs: Transaction[]) => {
   const groups: Record<string, Transaction[]> = {};

@@ -63,13 +63,16 @@ const NAV = [
 
 const SIDEBAR_FULL = 220;
 const SIDEBAR_ICON = 64;
-const MOBILE_BREAKPOINT = 768;
+const MOBILE_BREAKPOINT = 1024;
+
+const TOPBAR_HEIGHT = 52;
 
 interface SidebarProps {
   onWidthChange?: (width: number) => void;
+  onTopbarHeight?: (height: number) => void;
 }
 
-export default function Sidebar({ onWidthChange }: SidebarProps) {
+export default function Sidebar({ onWidthChange, onTopbarHeight }: SidebarProps) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [isMobile, setIsMobile] = useState(window.innerWidth < MOBILE_BREAKPOINT);
@@ -90,11 +93,15 @@ export default function Sidebar({ onWidthChange }: SidebarProps) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const currentWidth = isMobile ? SIDEBAR_ICON : collapsed ? SIDEBAR_ICON : SIDEBAR_FULL;
+  const currentWidth = isMobile ? 0 : collapsed ? SIDEBAR_ICON : SIDEBAR_FULL;
 
   useEffect(() => {
     onWidthChange?.(currentWidth);
   }, [currentWidth, onWidthChange]);
+
+  useEffect(() => {
+    onTopbarHeight?.(isMobile ? TOPBAR_HEIGHT : 0);
+  }, [isMobile, onTopbarHeight]);
 
   // Close drawer when navigating
   useEffect(() => {
@@ -211,18 +218,42 @@ export default function Sidebar({ onWidthChange }: SidebarProps) {
 
   return (
     <>
-      {/* Static sidebar (desktop full / icon-only) */}
-      <div style={{
-        width: sidebarWidth, minWidth: sidebarWidth, height: '100vh',
-        background: '#141414', display: 'flex', flexDirection: 'column',
-        position: 'fixed', left: 0, top: 0, zIndex: 100,
-        transition: 'width 0.2s ease, min-width 0.2s ease',
-        overflow: 'hidden',
-      }}>
-        <LogoButton showText={showLabels} />
-        <NavItems labels={showLabels} />
-        <UserSection showText={showLabels} />
-      </div>
+      {/* Static sidebar (desktop only) */}
+      {!isMobile && (
+        <div style={{
+          width: sidebarWidth, minWidth: sidebarWidth, height: '100vh',
+          background: '#141414', display: 'flex', flexDirection: 'column',
+          position: 'fixed', left: 0, top: 0, zIndex: 100,
+          transition: 'width 0.2s ease, min-width 0.2s ease',
+          overflow: 'hidden',
+        }}>
+          <LogoButton showText={showLabels} />
+          <NavItems labels={showLabels} />
+          <UserSection showText={showLabels} />
+        </div>
+      )}
+
+      {/* Mobile top bar */}
+      {isMobile && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 150,
+          height: TOPBAR_HEIGHT, background: 'white',
+          display: 'flex', alignItems: 'center', padding: '0 16px',
+          borderBottom: '1px solid #EEEEE8',
+        }}>
+          {!drawerOpen && (
+            <div
+              onClick={handleLogoClick}
+              style={{
+                width: 36, height: 36, background: '#D1FF19', borderRadius: 8,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontWeight: 800, fontSize: 18, color: '#111',
+                cursor: 'pointer', userSelect: 'none',
+              }}
+            >B</div>
+          )}
+        </div>
+      )}
 
       {/* Mobile drawer overlay */}
       {isMobile && drawerOpen && (

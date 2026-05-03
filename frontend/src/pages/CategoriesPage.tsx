@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { formatCurrency as formatRp } from "@/utils/format";
 import {
   categoryService,
   Category,
@@ -259,12 +260,6 @@ const MiniBar = ({ stats }: { stats: CategoryStats | null }) => {
   );
 };
 
-const formatRp = (amount: number) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(amount);
 
 export default function CategoriesPage() {
   const [cats, setCats] = useState<Category[]>([]);

@@ -1,5 +1,16 @@
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(amount);
+  const abs = Math.abs(amount);
+  const sign = amount < 0 ? '-' : '';
+  if (abs >= 1_000_000_000) {
+    const val = abs / 1_000_000_000;
+    return `${sign}Rp${new Intl.NumberFormat('id-ID', { maximumFractionDigits: val % 1 === 0 ? 0 : 1 }).format(val)}M`;
+  }
+  if (abs >= 1_000_000) {
+    const val = abs / 1_000_000;
+    return `${sign}Rp${new Intl.NumberFormat('id-ID', { maximumFractionDigits: val % 1 === 0 ? 0 : 1 }).format(val)}Jt`;
+  }
+  const val = abs / 1_000;
+  return `${sign}Rp${new Intl.NumberFormat('id-ID', { maximumFractionDigits: val % 1 === 0 ? 0 : 1 }).format(val)}K`;
 }
 
 export function formatDate(dateStr: string): string {
