@@ -9,7 +9,19 @@ import {
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
+// Simple hook to detect mobile breakpoint
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+  return isMobile;
+}
+
 export default function EventsPage() {
+  const isMobile = useIsMobile();
   const [events, setEvents] = useState<BudgetEvent[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
 
@@ -53,7 +65,7 @@ export default function EventsPage() {
       .then((res) => {
         const data = res.data.data;
         setEvents(data);
-        if (data.length > 0 && !selectedId) {
+        if (data.length > 0 && !isMobile) {
           const active = data.find((e) => isActive(e));
           setSelectedId(active?.id ?? data[0].id);
           setActiveTab(active ? "active" : "inactive");
@@ -159,6 +171,7 @@ export default function EventsPage() {
 
   const deleteEvent = async () => {
     if (!selectedId) return;
+    if (!window.confirm(`Delete "${selected?.name}"? This cannot be undone.`)) return;
     await eventService.remove(selectedId);
     const remaining = events.filter((e) => e.id !== selectedId);
     setEvents(remaining);
@@ -201,9 +214,9 @@ export default function EventsPage() {
     actionStyle: React.CSSProperties;
   }) => (
     <div
+      className="flex-col xs:flex-row xs:items-center"
       style={{
         display: "flex",
-        alignItems: "center",
         gap: 14,
         padding: "13px 16px",
         background: i % 2 === 0 ? "white" : "#FAFAF8",
@@ -229,32 +242,34 @@ export default function EventsPage() {
           {tx.subCategory ? ` / ${tx.subCategory.name}` : ""}
         </div>
       </div>
-      <div
-        style={{
-          fontSize: 13,
-          fontWeight: 700,
-          color: amountColor(tx.amount, tx.type.name),
-          flexShrink: 0,
-        }}
-      >
-        {tx.type.name === "income" ? "+" : "-"}
-        {formatCurrency(tx.amount)}
+      <div className="flex items-center justify-between gap-3">
+        <div
+          style={{
+            fontSize: 13,
+            fontWeight: 700,
+            color: amountColor(tx.amount, tx.type.name),
+            flexShrink: 0,
+          }}
+        >
+          {tx.type.name === "income" ? "+" : "-"}
+          {formatCurrency(tx.amount)}
+        </div>
+        <button
+          onClick={() => action(tx.id)}
+          style={{
+            padding: "5px 12px",
+            borderRadius: 6,
+            border: "none",
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: "pointer",
+            flexShrink: 0,
+            ...actionStyle,
+          }}
+        >
+          {actionLabel}
+        </button>
       </div>
-      <button
-        onClick={() => action(tx.id)}
-        style={{
-          padding: "5px 12px",
-          borderRadius: 6,
-          border: "none",
-          fontSize: 11,
-          fontWeight: 700,
-          cursor: "pointer",
-          flexShrink: 0,
-          ...actionStyle,
-        }}
-      >
-        {actionLabel}
-      </button>
     </div>
   );
 
@@ -279,79 +294,102 @@ export default function EventsPage() {
   return (
     <div
       style={{
-        height: "100vh",
+        minHeight: "100vh",
+        height: isMobile ? "auto" : "100vh",
         display: "flex",
         flexDirection: "column",
         background: "#F5F5F2",
-        overflow: "hidden",
+        overflow: isMobile ? "auto" : "hidden",
       }}
     >
       {/* Header */}
       <div
         style={{
-          padding: "28px 32px 16px",
+          padding: isMobile ? "20px 16px 12px" : "28px 32px 16px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           flexShrink: 0,
         }}
       >
-        <div>
-          <h1
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {isMobile && selectedId && (
+            <button
+              onClick={() => setSelectedId(null)}
+              style={{
+                padding: "6px 10px",
+                borderRadius: 8,
+                border: "1px solid #E5E5E0",
+                background: "white",
+                color: "#555",
+                fontSize: 13,
+                cursor: "pointer",
+                flexShrink: 0,
+              }}
+            >
+              ← Back
+            </button>
+          )}
+          <div>
+            <h1
+              style={{
+                fontSize: 22,
+                fontWeight: 700,
+                color: "#111",
+                margin: 0,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Events
+            </h1>
+            <p style={{ fontSize: 13, color: "#999", margin: "3px 0 0" }}>
+              Track why a month spikes
+            </p>
+          </div>
+        </div>
+        {(!isMobile || !selectedId) && (
+          <button
+            onClick={() => setShowAdd(true)}
             style={{
-              fontSize: 22,
-              fontWeight: 700,
+              padding: "10px 20px",
+              borderRadius: 8,
+              border: "none",
+              background: "#D1FF19",
               color: "#111",
-              margin: 0,
-              letterSpacing: "-0.02em",
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
             }}
           >
-            Events
-          </h1>
-          <p style={{ fontSize: 13, color: "#999", margin: "3px 0 0" }}>
-            Track why a month spikes
-          </p>
-        </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          style={{
-            padding: "10px 20px",
-            borderRadius: 8,
-            border: "none",
-            background: "#D1FF19",
-            color: "#111",
-            fontSize: 13,
-            fontWeight: 700,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-          }}
-        >
-          <span style={{ fontSize: 16, lineHeight: 1 }}>+</span> New Event
-        </button>
+            <span style={{ fontSize: 16, lineHeight: 1 }}>+</span> New Event
+          </button>
+        )}
       </div>
 
       {/* Two panels */}
       <div
         style={{
           display: "flex",
+          flexDirection: isMobile ? "column" : "row",
           flex: 1,
-          padding: "0 32px 32px",
+          padding: isMobile ? "0 16px 24px" : "0 32px 32px",
           gap: 20,
-          overflow: "hidden",
+          overflow: isMobile ? "auto" : "hidden",
         }}
       >
-        {/* Left list */}
+        {/* Left list — hidden on mobile when detail is open */}
         <div
           style={{
-            width: 264,
+            width: isMobile ? "100%" : 264,
             flexShrink: 0,
             background: "white",
             borderRadius: 12,
             border: "1px solid #EEEEE8",
             overflow: "hidden",
-            display: "flex",
+            display: isMobile && selectedId ? "none" : "flex",
             flexDirection: "column",
             boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
           }}
@@ -582,27 +620,27 @@ export default function EventsPage() {
           </div>
         </div>
 
-        {/* Right detail */}
+        {/* Right detail — hidden on mobile when no event selected */}
         <div
           style={{
             flex: 1,
             background: "white",
             borderRadius: 12,
             border: "1px solid #EEEEE8",
-            display: "flex",
+            display: isMobile && !selectedId ? "none" : "flex",
             flexDirection: "column",
-            overflow: "hidden",
+            overflow: isMobile ? "visible" : "hidden",
             boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
           }}
         >
           {selected ? (
             <>
               <div
+                className="flex-col xs:flex-row xs:items-center"
                 style={{
-                  padding: "22px 28px",
+                  padding: isMobile ? "16px 20px" : "22px 28px",
                   borderBottom: "1px solid #F2F2EE",
                   display: "flex",
-                  alignItems: "center",
                   gap: 16,
                   flexShrink: 0,
                 }}
@@ -621,18 +659,6 @@ export default function EventsPage() {
                     >
                       {selected.name}
                     </div>
-                    <div
-                      style={{
-                        padding: "3px 10px",
-                        borderRadius: 20,
-                        fontSize: 11,
-                        fontWeight: 600,
-                        background: selectedIsActive ? "#EDFDF5" : "#F5F5F2",
-                        color: selectedIsActive ? "#2A9D5C" : "#aaa",
-                      }}
-                    >
-                      {selectedIsActive ? "● Active" : "○ Inactive"}
-                    </div>
                   </div>
                   <div style={{ fontSize: 12, color: "#aaa", marginTop: 3 }}>
                     {formatDateLabel(selected.startDate)} –{" "}
@@ -642,7 +668,7 @@ export default function EventsPage() {
                     · {linkedTxs.length} linked
                   </div>
                 </div>
-                <div style={{ textAlign: "right" }}>
+                <div className="sm:text-right">
                   <div
                     style={{
                       fontSize: 10,
@@ -683,7 +709,13 @@ export default function EventsPage() {
                 </button>
               </div>
 
-              <div style={{ flex: 1, overflowY: "auto", padding: "24px 28px" }}>
+              <div
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: isMobile ? "16px 20px" : "24px 28px",
+                }}
+              >
                 {selected.description && (
                   <div style={{ marginBottom: 22 }}>
                     {sectionHead("DESCRIPTION")}
@@ -705,7 +737,7 @@ export default function EventsPage() {
 
                 <div style={{ marginBottom: 22 }}>
                   {sectionHead("IMPACT ANALYSIS")}
-                  <div style={{ display: "flex", gap: 12 }}>
+                  <div className="grid grid-cols-1 xs:grid-cols-3 gap-4 impact-analysis">
                     {[
                       {
                         label: "MONTH OUTFLOW",

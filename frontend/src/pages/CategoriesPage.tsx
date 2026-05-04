@@ -290,7 +290,8 @@ export default function CategoriesPage() {
       const res = await categoryService.getAll();
       const list = res.data.data;
       setCats(list);
-      if (!selectedId && list.length && window.innerWidth >= 640) setSelectedId(list[0].id);
+      if (!selectedId && list.length && window.innerWidth >= 640)
+        setSelectedId(list[0].id);
     } catch {
       setError("Failed to load categories");
     } finally {
@@ -514,7 +515,7 @@ export default function CategoriesPage() {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {mobileView === "detail" && (
             <button
-              className="sm:hidden"
+              className="flex sm:hidden"
               onClick={() => setMobileView("list")}
               style={{
                 padding: "6px 12px",
@@ -524,7 +525,6 @@ export default function CategoriesPage() {
                 color: "#333",
                 fontSize: 13,
                 cursor: "pointer",
-                display: "flex",
                 alignItems: "center",
                 gap: 4,
               }}
@@ -541,7 +541,7 @@ export default function CategoriesPage() {
               letterSpacing: "-0.02em",
             }}
           >
-            {mobileView === "detail" && selected ? selected.name : "Categories"}
+            Categories
           </h1>
         </div>
         {mobileView === "list" && (
@@ -914,8 +914,10 @@ export default function CategoriesPage() {
                         key={s.id}
                         style={{
                           display: "flex",
-                          alignItems: editingSubId === s.id ? "stretch" : "center",
-                          flexDirection: editingSubId === s.id ? "column" : "row",
+                          alignItems:
+                            editingSubId === s.id ? "stretch" : "center",
+                          flexDirection:
+                            editingSubId === s.id ? "column" : "row",
                           gap: 8,
                           padding: "7px 12px",
                           borderRadius: 8,
@@ -926,13 +928,21 @@ export default function CategoriesPage() {
                         {editingSubId === s.id ? (
                           <>
                             {/* Icon + input row */}
-                            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: 8,
+                                alignItems: "center",
+                              }}
+                            >
                               {/* Sub icon picker */}
                               <div
                                 style={{ position: "relative", flexShrink: 0 }}
                               >
                                 <button
-                                  onClick={() => setShowSubIconPicker((p) => !p)}
+                                  onClick={() =>
+                                    setShowSubIconPicker((p) => !p)
+                                  }
                                   style={{
                                     width: 32,
                                     height: 32,
@@ -947,7 +957,9 @@ export default function CategoriesPage() {
                                   }}
                                 >
                                   {editingSubIcon ?? (
-                                    <span style={{ fontSize: 14, color: "#ccc" }}>
+                                    <span
+                                      style={{ fontSize: 14, color: "#ccc" }}
+                                    >
                                       ＋
                                     </span>
                                   )}
@@ -966,7 +978,9 @@ export default function CategoriesPage() {
                                         setEditingSubIcon(e);
                                         setShowSubIconPicker(false);
                                       }}
-                                      onClose={() => setShowSubIconPicker(false)}
+                                      onClose={() =>
+                                        setShowSubIconPicker(false)
+                                      }
                                     />
                                   </div>
                                 )}
