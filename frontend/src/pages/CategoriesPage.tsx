@@ -267,6 +267,7 @@ export default function CategoriesPage() {
   const [types, setTypes] = useState<TransactionType[]>([]);
   const [activeTab, setActiveTab] = useState<"expense" | "income">("expense");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [mobileView, setMobileView] = useState<"list" | "detail">("list");
   const [editName, setEditName] = useState("");
   const [editTypeId, setEditTypeId] = useState("");
   const [editIcon, setEditIcon] = useState<string | null>(null);
@@ -289,7 +290,7 @@ export default function CategoriesPage() {
       const res = await categoryService.getAll();
       const list = res.data.data;
       setCats(list);
-      if (!selectedId && list.length) setSelectedId(list[0].id);
+      if (!selectedId && list.length && window.innerWidth >= 640) setSelectedId(list[0].id);
     } catch {
       setError("Failed to load categories");
     } finally {
@@ -330,7 +331,10 @@ export default function CategoriesPage() {
     }
   }, [selectedId]);
 
-  const handleSelectCategory = (id: string) => setSelectedId(id);
+  const handleSelectCategory = (id: string) => {
+    setSelectedId(id);
+    setMobileView("detail");
+  };
 
   const handleAddCategory = async () => {
     if (!types.length) return;
@@ -505,36 +509,63 @@ export default function CategoriesPage() {
           justifyContent: "space-between",
           flexShrink: 0,
         }}
+        className="px-4 sm:px-8"
       >
-        <h1
-          style={{
-            fontSize: 22,
-            fontWeight: 700,
-            color: "#111",
-            margin: 0,
-            letterSpacing: "-0.02em",
-          }}
-        >
-          Categories
-        </h1>
-        <button
-          onClick={handleAddCategory}
-          style={{
-            padding: "10px 20px",
-            borderRadius: 8,
-            border: "none",
-            background: "#D1FF19",
-            color: "#111",
-            fontSize: 13,
-            fontWeight: 700,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-          }}
-        >
-          <span style={{ fontSize: 16, lineHeight: 1 }}>+</span> New Category
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {mobileView === "detail" && (
+            <button
+              className="sm:hidden"
+              onClick={() => setMobileView("list")}
+              style={{
+                padding: "6px 12px",
+                borderRadius: 8,
+                border: "1px solid #E5E5E0",
+                background: "white",
+                color: "#333",
+                fontSize: 13,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              ← Back
+            </button>
+          )}
+          <h1
+            style={{
+              fontSize: 22,
+              fontWeight: 700,
+              color: "#111",
+              margin: 0,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {mobileView === "detail" && selected ? selected.name : "Categories"}
+          </h1>
+        </div>
+        {mobileView === "list" && (
+          <button
+            onClick={handleAddCategory}
+            style={{
+              padding: "10px 20px",
+              borderRadius: 8,
+              border: "none",
+              background: "#D1FF19",
+              color: "#111",
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>{" "}
+            <span className="hidden sm:inline">New Category</span>
+            <span className="sm:hidden">New</span>
+          </button>
+        )}
       </div>
 
       {/* Two panels */}
@@ -546,6 +577,7 @@ export default function CategoriesPage() {
           gap: 20,
           overflow: "hidden",
         }}
+        className="!px-4 sm:!px-8"
       >
         {/* Left list */}
         <div
@@ -556,10 +588,12 @@ export default function CategoriesPage() {
             borderRadius: 12,
             border: "1px solid #EEEEE8",
             overflow: "hidden",
-            display: "flex",
             flexDirection: "column",
             boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
           }}
+          className={
+            mobileView === "detail" ? "hidden sm:flex" : "flex !w-full sm:!w-64"
+          }
         >
           <div
             style={{
@@ -622,6 +656,7 @@ export default function CategoriesPage() {
                   <div
                     key={cat.id}
                     onClick={() => handleSelectCategory(cat.id)}
+                    className="cat-item"
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -692,11 +727,11 @@ export default function CategoriesPage() {
             background: "white",
             borderRadius: 12,
             border: "1px solid #EEEEE8",
-            display: "flex",
             flexDirection: "column",
             overflow: "hidden",
             boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
           }}
+          className={mobileView === "list" ? "hidden sm:flex" : "flex"}
         >
           {selected ? (
             <>
@@ -710,6 +745,7 @@ export default function CategoriesPage() {
                   gap: 16,
                   flexShrink: 0,
                 }}
+                className="hidden sm:flex"
               >
                 <Avatar icon={selected.icon} name={selected.name} size={50} />
                 <div>
@@ -731,92 +767,112 @@ export default function CategoriesPage() {
 
               <div style={{ flex: 1, overflowY: "auto", padding: "24px 28px" }}>
                 {/* Icon + Name + Type */}
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 12,
-                    marginBottom: 26,
-                    alignItems: "flex-end",
-                  }}
-                >
-                  {/* Icon picker trigger */}
-                  <div style={{ position: "relative", flexShrink: 0 }}>
-                    {sectionHead("ICON")}
-                    <button
-                      onClick={() => setShowIconPicker((p) => !p)}
-                      style={{
-                        width: 46,
-                        height: 42,
-                        borderRadius: 8,
-                        border: "1px solid #E5E5E0",
-                        background: "white",
-                        cursor: "pointer",
-                        fontSize: 22,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      {editIcon ?? (
-                        <span style={{ fontSize: 18, color: "#ccc" }}>＋</span>
-                      )}
-                    </button>
-                    {editIcon && (
+                <style>{`
+                  @media (max-width: 399px) {
+                    .cat-form { display: flex; flex-direction: column; gap: 12px; }
+                    .cat-form-type { flex: unset !important; width: 100%; }
+                  }
+                  @media (min-width: 400px) {
+                    .cat-form { display: flex; flex-direction: row; gap: 12px; align-items: flex-end; }
+                    .cat-form-type { flex: 1; }
+                  }
+                  @media (max-width: 639px) {
+                    .cat-item { background: white !important; border-left-color: transparent !important; }
+                  }
+                `}</style>
+                <div style={{ marginBottom: 26 }} className="cat-form">
+                  {/* Icon + Name row (always together) */}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 12,
+                      alignItems: "flex-end",
+                      flex: 2,
+                      minWidth: 0,
+                    }}
+                  >
+                    {/* Icon picker trigger */}
+                    <div style={{ position: "relative", flexShrink: 0 }}>
+                      {sectionHead("ICON")}
                       <button
-                        onClick={() => setEditIcon(null)}
+                        onClick={() => setShowIconPicker((p) => !p)}
                         style={{
-                          position: "absolute",
-                          top: 22,
-                          right: -6,
-                          width: 16,
-                          height: 16,
-                          borderRadius: "50%",
-                          border: "none",
-                          background: "#E5E5E0",
-                          color: "#666",
-                          fontSize: 9,
+                          width: 46,
+                          height: 42,
+                          borderRadius: 8,
+                          border: "1px solid #E5E5E0",
+                          background: "white",
                           cursor: "pointer",
+                          fontSize: 22,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          lineHeight: 1,
                         }}
                       >
-                        ✕
+                        {editIcon ?? (
+                          <span style={{ fontSize: 18, color: "#ccc" }}>
+                            ＋
+                          </span>
+                        )}
                       </button>
-                    )}
-                    {showIconPicker && (
-                      <div style={{ position: "absolute", top: 70, left: 0 }}>
-                        <EmojiPicker
-                          onSelect={(e) => {
-                            setEditIcon(e);
-                            setShowIconPicker(false);
+                      {editIcon && (
+                        <button
+                          onClick={() => setEditIcon(null)}
+                          style={{
+                            position: "absolute",
+                            top: 22,
+                            right: -6,
+                            width: 16,
+                            height: 16,
+                            borderRadius: "50%",
+                            border: "none",
+                            background: "#E5E5E0",
+                            color: "#666",
+                            fontSize: 9,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            lineHeight: 1,
                           }}
-                          onClose={() => setShowIconPicker(false)}
-                        />
-                      </div>
-                    )}
+                        >
+                          ✕
+                        </button>
+                      )}
+                      {showIconPicker && (
+                        <div style={{ position: "absolute", top: 70, left: 0 }}>
+                          <EmojiPicker
+                            onSelect={(e) => {
+                              setEditIcon(e);
+                              setShowIconPicker(false);
+                            }}
+                            onClose={() => setShowIconPicker(false)}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      {sectionHead("CATEGORY NAME")}
+                      <input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "10px 14px",
+                          borderRadius: 8,
+                          border: "1px solid #E5E5E0",
+                          fontSize: 14,
+                          color: "#111",
+                          outline: "none",
+                          boxSizing: "border-box",
+                          fontWeight: 500,
+                        }}
+                      />
+                    </div>
                   </div>
 
-                  <div style={{ flex: 2 }}>
-                    {sectionHead("CATEGORY NAME")}
-                    <input
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px",
-                        borderRadius: 8,
-                        border: "1px solid #E5E5E0",
-                        fontSize: 14,
-                        color: "#111",
-                        outline: "none",
-                        boxSizing: "border-box",
-                        fontWeight: 500,
-                      }}
-                    />
-                  </div>
-                  <div style={{ flex: 1 }}>
+                  <div className="cat-form-type">
                     {sectionHead("TYPE")}
                     <select
                       value={editTypeId}
@@ -858,7 +914,8 @@ export default function CategoriesPage() {
                         key={s.id}
                         style={{
                           display: "flex",
-                          alignItems: "center",
+                          alignItems: editingSubId === s.id ? "stretch" : "center",
+                          flexDirection: editingSubId === s.id ? "column" : "row",
                           gap: 8,
                           padding: "7px 12px",
                           borderRadius: 8,
@@ -868,106 +925,115 @@ export default function CategoriesPage() {
                       >
                         {editingSubId === s.id ? (
                           <>
-                            {/* Sub icon picker */}
-                            <div
-                              style={{ position: "relative", flexShrink: 0 }}
-                            >
-                              <button
-                                onClick={() => setShowSubIconPicker((p) => !p)}
+                            {/* Icon + input row */}
+                            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                              {/* Sub icon picker */}
+                              <div
+                                style={{ position: "relative", flexShrink: 0 }}
+                              >
+                                <button
+                                  onClick={() => setShowSubIconPicker((p) => !p)}
+                                  style={{
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: 6,
+                                    border: "1px solid #E5E5E0",
+                                    background: "white",
+                                    cursor: "pointer",
+                                    fontSize: 16,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                  }}
+                                >
+                                  {editingSubIcon ?? (
+                                    <span style={{ fontSize: 14, color: "#ccc" }}>
+                                      ＋
+                                    </span>
+                                  )}
+                                </button>
+                                {showSubIconPicker && (
+                                  <div
+                                    style={{
+                                      position: "absolute",
+                                      top: 36,
+                                      left: 0,
+                                      zIndex: 50,
+                                    }}
+                                  >
+                                    <EmojiPicker
+                                      onSelect={(e) => {
+                                        setEditingSubIcon(e);
+                                        setShowSubIconPicker(false);
+                                      }}
+                                      onClose={() => setShowSubIconPicker(false)}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                              <input
+                                autoFocus
+                                value={editingSubName}
+                                onChange={(e) =>
+                                  setEditingSubName(e.target.value)
+                                }
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") handleSaveSub(s);
+                                  if (e.key === "Escape") {
+                                    setEditingSubId(null);
+                                    setShowSubIconPicker(false);
+                                  }
+                                }}
                                 style={{
-                                  width: 32,
-                                  height: 32,
+                                  flex: 1,
+                                  minWidth: 0,
+                                  padding: "4px 8px",
+                                  borderRadius: 6,
+                                  border: "1px solid #D1FF19",
+                                  fontSize: 13,
+                                  color: "#111",
+                                  outline: "none",
+                                  background: "white",
+                                }}
+                              />
+                            </div>
+                            {/* Save / Cancel row */}
+                            <div style={{ display: "flex", gap: 6 }}>
+                              <button
+                                onClick={() => handleSaveSub(s)}
+                                style={{
+                                  flex: 1,
+                                  padding: "6px 12px",
+                                  borderRadius: 6,
+                                  border: "none",
+                                  background: "#D1FF19",
+                                  color: "#111",
+                                  fontSize: 12,
+                                  fontWeight: 700,
+                                  cursor: "pointer",
+                                }}
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditingSubId(null);
+                                  setShowSubIconPicker(false);
+                                }}
+                                style={{
+                                  flex: 1,
+                                  padding: "6px 10px",
                                   borderRadius: 6,
                                   border: "1px solid #E5E5E0",
                                   background: "white",
+                                  color: "#888",
+                                  fontSize: 12,
                                   cursor: "pointer",
-                                  fontSize: 16,
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
                                 }}
                               >
-                                {editingSubIcon ?? (
-                                  <span style={{ fontSize: 14, color: "#ccc" }}>
-                                    ＋
-                                  </span>
-                                )}
+                                Cancel
                               </button>
-                              {showSubIconPicker && (
-                                <div
-                                  style={{
-                                    position: "absolute",
-                                    top: 36,
-                                    left: 0,
-                                    zIndex: 50,
-                                  }}
-                                >
-                                  <EmojiPicker
-                                    onSelect={(e) => {
-                                      setEditingSubIcon(e);
-                                      setShowSubIconPicker(false);
-                                    }}
-                                    onClose={() => setShowSubIconPicker(false)}
-                                  />
-                                </div>
-                              )}
                             </div>
-                            <input
-                              autoFocus
-                              value={editingSubName}
-                              onChange={(e) =>
-                                setEditingSubName(e.target.value)
-                              }
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") handleSaveSub(s);
-                                if (e.key === "Escape") {
-                                  setEditingSubId(null);
-                                  setShowSubIconPicker(false);
-                                }
-                              }}
-                              style={{
-                                flex: 1,
-                                padding: "4px 8px",
-                                borderRadius: 6,
-                                border: "1px solid #D1FF19",
-                                fontSize: 13,
-                                color: "#111",
-                                outline: "none",
-                                background: "white",
-                              }}
-                            />
-                            <button
-                              onClick={() => handleSaveSub(s)}
-                              style={{
-                                padding: "4px 12px",
-                                borderRadius: 6,
-                                border: "none",
-                                background: "#D1FF19",
-                                color: "#111",
-                                fontSize: 12,
-                                fontWeight: 700,
-                                cursor: "pointer",
-                              }}
-                            >
-                              Save
-                            </button>
-                            <button
-                              onClick={() => {
-                                setEditingSubId(null);
-                                setShowSubIconPicker(false);
-                              }}
-                              style={{
-                                padding: "4px 10px",
-                                borderRadius: 6,
-                                border: "1px solid #E5E5E0",
-                                background: "white",
-                                color: "#888",
-                                fontSize: 12,
-                                cursor: "pointer",
-                              }}
-                            >
-                              Cancel
-                            </button>
                           </>
                         ) : (
                           <>
@@ -979,31 +1045,43 @@ export default function CategoriesPage() {
                             </span>
                             <button
                               onClick={() => handleStartEditSub(s)}
+                              title="Edit"
                               style={{
-                                padding: "3px 10px",
+                                width: 30,
+                                height: 30,
                                 borderRadius: 6,
                                 border: "1px solid #E5E5E0",
                                 background: "white",
                                 color: "#555",
-                                fontSize: 11,
+                                fontSize: 14,
                                 cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
                               }}
                             >
-                              Edit
+                              ✏️
                             </button>
                             <button
                               onClick={() => handleRemoveSub(s)}
+                              title="Delete"
                               style={{
-                                padding: "3px 10px",
+                                width: 30,
+                                height: 30,
                                 borderRadius: 6,
                                 border: "1px solid #FDEAEA",
                                 background: "#FDF8F8",
                                 color: "#E05C5C",
-                                fontSize: 11,
+                                fontSize: 14,
                                 cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
                               }}
                             >
-                              Delete
+                              🗑️
                             </button>
                           </>
                         )}
@@ -1025,6 +1103,7 @@ export default function CategoriesPage() {
                   {/* Add sub-category row */}
                   <div
                     style={{ display: "flex", gap: 8, alignItems: "center" }}
+                    className="flex-wrap sm:flex-nowrap"
                   >
                     <div style={{ position: "relative", flexShrink: 0 }}>
                       <button
@@ -1072,8 +1151,8 @@ export default function CategoriesPage() {
                       onChange={(e) => setNewSub(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleAddSub()}
                       placeholder="Add sub-category…"
+                      className="flex-1 min-w-0 sm:flex-1"
                       style={{
-                        flex: 1,
                         padding: "9px 14px",
                         borderRadius: 8,
                         border: "1.5px dashed #D1FF19",
@@ -1081,10 +1160,12 @@ export default function CategoriesPage() {
                         color: "#333",
                         outline: "none",
                         background: "#FAFDE8",
+                        width: "100%",
                       }}
                     />
                     <button
                       onClick={handleAddSub}
+                      className="w-full sm:w-auto"
                       style={{
                         padding: "9px 18px",
                         borderRadius: 8,
@@ -1113,7 +1194,12 @@ export default function CategoriesPage() {
                 >
                   {sectionHead("USAGE THIS MONTH")}
                   <div
-                    style={{ display: "flex", alignItems: "center", gap: 24 }}
+                    className="flex-col sm:flex-row sm:items-center"
+                    style={{
+                      display: "flex",
+                      gap: 24,
+                      flexWrap: "wrap",
+                    }}
                   >
                     <div>
                       <div
@@ -1141,7 +1227,10 @@ export default function CategoriesPage() {
                 </div>
 
                 {/* Actions */}
-                <div style={{ display: "flex", gap: 12 }}>
+                <div
+                  style={{ display: "flex", gap: 12 }}
+                  className="flex-col sm:flex-row"
+                >
                   <button
                     onClick={handleSave}
                     style={{
