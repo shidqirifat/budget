@@ -60,11 +60,17 @@ export interface AnalyticsInsights {
   incomeDiff: AnalyticsCategoryDiff[];
 }
 
+export interface AnalyticsEventSummary {
+  runningEventCount: number;
+  mostExpensiveEvent: { name: string; total: number } | null;
+}
+
 export interface AnalyticsData {
   monthly: AnalyticsMonthly[];
   categoryBreakdown: AnalyticsCategory[];
   incomeBreakdown: AnalyticsCategory[];
   insights: AnalyticsInsights;
+  eventSummary: AnalyticsEventSummary;
 }
 
 export const transactionService = {

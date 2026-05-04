@@ -128,7 +128,7 @@ export default function AnalyticsPage() {
       ...months.map((m) => Math.max(m.inflow, m.outflow)),
       1,
     );
-    const BAR_H = 220,
+    const BAR_H = 350,
       BAR_W = 28,
       GAP = 14;
     const GROUP = BAR_W * 2 + GAP;
@@ -216,7 +216,13 @@ export default function AnalyticsPage() {
     );
   };
 
-  const DonutChart = ({ items, total }: { items: { color: string; amount: number }[]; total: number }) => {
+  const DonutChart = ({
+    items,
+    total,
+  }: {
+    items: { color: string; amount: number }[];
+    total: number;
+  }) => {
     if (!items.length) return null;
     const SIZE = 140,
       CX = 70,
@@ -427,57 +433,63 @@ export default function AnalyticsPage() {
                 marginBottom: 18,
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: 20,
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#111" }}>
-                    Monthly Cash Flow
-                  </div>
-                  <div style={{ fontSize: 12, color: "#bbb", marginTop: 3 }}>
-                    {chartFirst
-                      ? `${monthLabel(chartFirst.month)} – ${chartLast ? monthLabel(chartLast.month) : ""}`
-                      : ""}
-                  </div>
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#111" }}>
+                  Monthly Cash Flow
                 </div>
-                <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-                  {[
-                    ["#2A9D5C", "Inflow"],
-                    ["#D1FF19", "Outflow"],
-                  ].map(([col, lbl]) => (
-                    <div
-                      key={lbl}
-                      style={{ display: "flex", alignItems: "center", gap: 6 }}
-                    >
-                      <div
-                        style={{
-                          width: 10,
-                          height: 10,
-                          borderRadius: "50%",
-                          background: col,
-                        }}
-                      />
-                      <span style={{ fontSize: 12, color: "#888" }}>{lbl}</span>
-                    </div>
-                  ))}
+                <div style={{ fontSize: 12, color: "#bbb", marginTop: 3 }}>
+                  {chartFirst
+                    ? `${monthLabel(chartFirst.month)} – ${chartLast ? monthLabel(chartLast.month) : ""}`
+                    : ""}
                 </div>
               </div>
               <div
                 style={{ display: "flex", gap: 28, alignItems: "flex-start" }}
               >
-                <div
-                  style={{
-                    overflowX: "auto",
-                    flex: "0 0 50%",
-                    minWidth: 0,
-                  }}
-                >
-                  <BarChart />
+                <div className="w-1/2">
+                  <div
+                    style={{
+                      overflowX: "auto",
+                      flex: "0 0 50%",
+                      minWidth: 0,
+                    }}
+                  >
+                    <BarChart />
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 16,
+                      alignItems: "center",
+                      marginTop: 12,
+                    }}
+                  >
+                    {[
+                      ["#2A9D5C", "Inflow"],
+                      ["#D1FF19", "Outflow"],
+                    ].map(([col, lbl]) => (
+                      <div
+                        key={lbl}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            background: col,
+                          }}
+                        />
+                        <span style={{ fontSize: 12, color: "#888" }}>
+                          {lbl}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {data?.insights &&
@@ -577,6 +589,82 @@ export default function AnalyticsPage() {
                             </div>
                           ))}
                         </div>
+
+                        {data.eventSummary && (
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              {
+                                icon: "📅",
+                                label: "RUNNING EVENTS",
+                                value: String(
+                                  data.eventSummary.runningEventCount,
+                                ),
+                                sub:
+                                  data.eventSummary.runningEventCount === 0
+                                    ? "No active events"
+                                    : `active this month`,
+                                accent: "#5C8AE0",
+                              },
+                              {
+                                icon: "🏆",
+                                label: "MOST EXPENSIVE EVENT",
+                                value:
+                                  data.eventSummary.mostExpensiveEvent?.name ??
+                                  "—",
+                                sub: data.eventSummary.mostExpensiveEvent
+                                  ? formatRp(
+                                      -data.eventSummary.mostExpensiveEvent
+                                        .total,
+                                    )
+                                  : "No events",
+                                accent: "#A05CE0",
+                              },
+                            ].map((r, i) => (
+                              <div
+                                key={i}
+                                style={{
+                                  padding: "10px 14px",
+                                  background: "#FAFAFA",
+                                  borderRadius: 10,
+                                  border: "1px solid #EEEEE8",
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    fontSize: 10,
+                                    color: "#ccc",
+                                    fontWeight: 600,
+                                    letterSpacing: "0.07em",
+                                    marginBottom: 4,
+                                  }}
+                                >
+                                  {r.icon} {r.label}
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: 13,
+                                    fontWeight: 700,
+                                    color: r.accent,
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                >
+                                  {r.value}
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: 11,
+                                    color: "#aaa",
+                                    marginTop: 2,
+                                  }}
+                                >
+                                  {r.sub}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
 
                         {hasDiffs && prev && (
                           <div
@@ -708,39 +796,157 @@ export default function AnalyticsPage() {
 
             <div style={{ display: "flex", gap: 14 }}>
               {cats.length > 0 && (
-                <div style={{ background: "white", borderRadius: 12, padding: "22px 28px", border: "1px solid #EEEEE8", flex: 1 }}>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#111", marginBottom: 16 }}>
+                <div
+                  style={{
+                    background: "white",
+                    borderRadius: 12,
+                    padding: "22px 28px",
+                    border: "1px solid #EEEEE8",
+                    flex: 1,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 700,
+                      color: "#111",
+                      marginBottom: 16,
+                    }}
+                  >
                     Expense Categories · {monthShort(month)}
                   </div>
-                  <div style={{ display: "flex", padding: "0 0 10px", borderBottom: "1px solid #F2F2EE", marginBottom: 8 }}>
-                    {["Category", ...(prev ? [monthShort(prev.month)] : []), monthShort(month), "% of Total", ...(prev ? ["% Diff"] : [])].map((h, i) => (
-                      <div key={h} style={{ flex: i === 0 ? 2 : 1, fontSize: 10, fontWeight: 600, color: "#bbb", letterSpacing: "0.07em", textAlign: i === 0 ? "left" : "right" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      padding: "0 0 10px",
+                      borderBottom: "1px solid #F2F2EE",
+                      marginBottom: 8,
+                    }}
+                  >
+                    {[
+                      "Category",
+                      ...(prev ? [monthShort(prev.month)] : []),
+                      monthShort(month),
+                      "% of Total",
+                      ...(prev ? ["% Diff"] : []),
+                    ].map((h, i) => (
+                      <div
+                        key={h}
+                        style={{
+                          flex: i === 0 ? 2 : 1,
+                          fontSize: 10,
+                          fontWeight: 600,
+                          color: "#bbb",
+                          letterSpacing: "0.07em",
+                          textAlign: i === 0 ? "left" : "right",
+                        }}
+                      >
                         {h}
                       </div>
                     ))}
                   </div>
                   {cats.map((row, i) => {
-                    const pctDiff = row.prevAmount > 0 ? Math.round(((row.amount - row.prevAmount) / row.prevAmount) * 100) : null;
+                    const pctDiff =
+                      row.prevAmount > 0
+                        ? Math.round(
+                            ((row.amount - row.prevAmount) / row.prevAmount) *
+                              100,
+                          )
+                        : null;
                     return (
-                      <div key={i} style={{ display: "flex", alignItems: "center", padding: "10px 0", borderBottom: i < cats.length - 1 ? "1px solid #F8F8F4" : "none" }}>
-                        <div style={{ flex: 2, display: "flex", alignItems: "center", gap: 8 }}>
-                          <div style={{ width: 10, height: 10, borderRadius: "50%", background: row.color, flexShrink: 0 }}/>
-                          <span style={{ fontSize: 13, fontWeight: 500, color: "#333" }}>{row.name}</span>
+                      <div
+                        key={i}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          padding: "10px 0",
+                          borderBottom:
+                            i < cats.length - 1 ? "1px solid #F8F8F4" : "none",
+                        }}
+                      >
+                        <div
+                          style={{
+                            flex: 2,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: "50%",
+                              background: row.color,
+                              flexShrink: 0,
+                            }}
+                          />
+                          <span
+                            style={{
+                              fontSize: 13,
+                              fontWeight: 500,
+                              color: "#333",
+                            }}
+                          >
+                            {row.name}
+                          </span>
                         </div>
                         {prev && (
-                          <div style={{ flex: 1, textAlign: "right", fontSize: 12, color: "#bbb" }}>
-                            {row.prevAmount > 0 ? formatRp(-row.prevAmount) : "—"}
+                          <div
+                            style={{
+                              flex: 1,
+                              textAlign: "right",
+                              fontSize: 12,
+                              color: "#bbb",
+                            }}
+                          >
+                            {row.prevAmount > 0
+                              ? formatRp(-row.prevAmount)
+                              : "—"}
                           </div>
                         )}
-                        <div style={{ flex: 1, textAlign: "right", fontSize: 13, fontWeight: 600, color: "#E05C5C" }}>
+                        <div
+                          style={{
+                            flex: 1,
+                            textAlign: "right",
+                            fontSize: 13,
+                            fontWeight: 600,
+                            color: "#E05C5C",
+                          }}
+                        >
                           {formatRp(-row.amount)}
                         </div>
-                        <div style={{ flex: 1, textAlign: "right", fontSize: 12, color: "#888" }}>
-                          {totalOut > 0 ? Math.round((row.amount / totalOut) * 100) : 0}%
+                        <div
+                          style={{
+                            flex: 1,
+                            textAlign: "right",
+                            fontSize: 12,
+                            color: "#888",
+                          }}
+                        >
+                          {totalOut > 0
+                            ? Math.round((row.amount / totalOut) * 100)
+                            : 0}
+                          %
                         </div>
                         {prev && (
-                          <div style={{ flex: 1, textAlign: "right", fontSize: 12, fontWeight: 600, color: pctDiff == null ? "#bbb" : pctDiff > 0 ? "#E05C5C" : "#2A9D5C" }}>
-                            {pctDiff == null ? "new" : `${pctDiff > 0 ? "+" : ""}${pctDiff}%`}
+                          <div
+                            style={{
+                              flex: 1,
+                              textAlign: "right",
+                              fontSize: 12,
+                              fontWeight: 600,
+                              color:
+                                pctDiff == null
+                                  ? "#bbb"
+                                  : pctDiff > 0
+                                    ? "#E05C5C"
+                                    : "#2A9D5C",
+                            }}
+                          >
+                            {pctDiff == null
+                              ? "new"
+                              : `${pctDiff > 0 ? "+" : ""}${pctDiff}%`}
                           </div>
                         )}
                       </div>
@@ -749,360 +955,673 @@ export default function AnalyticsPage() {
                 </div>
               )}
 
-              {(data?.incomeBreakdown ?? []).length > 0 && (() => {
-                const incCats = data!.incomeBreakdown.map((c, i) => ({ ...c, color: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }));
-                const totalIn = incCats.reduce((s, c) => s + c.amount, 0);
-                return (
-                  <div style={{ background: "white", borderRadius: 12, padding: "22px 28px", border: "1px solid #EEEEE8", flex: 1 }}>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: "#111", marginBottom: 16 }}>
-                      Income Categories · {monthShort(month)}
-                    </div>
-                    <div style={{ display: "flex", padding: "0 0 10px", borderBottom: "1px solid #F2F2EE", marginBottom: 8 }}>
-                      {["Category", ...(prev ? [monthShort(prev.month)] : []), monthShort(month), "% of Total", ...(prev ? ["% Diff"] : [])].map((h, i) => (
-                        <div key={h} style={{ flex: i === 0 ? 2 : 1, fontSize: 10, fontWeight: 600, color: "#bbb", letterSpacing: "0.07em", textAlign: i === 0 ? "left" : "right" }}>
-                          {h}
-                        </div>
-                      ))}
-                    </div>
-                    {incCats.map((row, i) => {
-                      const pctDiff = row.prevAmount > 0 ? Math.round(((row.amount - row.prevAmount) / row.prevAmount) * 100) : null;
-                      return (
-                        <div key={i} style={{ display: "flex", alignItems: "center", padding: "10px 0", borderBottom: i < incCats.length - 1 ? "1px solid #F8F8F4" : "none" }}>
-                          <div style={{ flex: 2, display: "flex", alignItems: "center", gap: 8 }}>
-                            <div style={{ width: 10, height: 10, borderRadius: "50%", background: row.color, flexShrink: 0 }}/>
-                            <span style={{ fontSize: 13, fontWeight: 500, color: "#333" }}>{row.name}</span>
+              {(data?.incomeBreakdown ?? []).length > 0 &&
+                (() => {
+                  const incCats = data!.incomeBreakdown.map((c, i) => ({
+                    ...c,
+                    color: CATEGORY_COLORS[i % CATEGORY_COLORS.length],
+                  }));
+                  const totalIn = incCats.reduce((s, c) => s + c.amount, 0);
+                  return (
+                    <div
+                      style={{
+                        background: "white",
+                        borderRadius: 12,
+                        padding: "22px 28px",
+                        border: "1px solid #EEEEE8",
+                        flex: 1,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 15,
+                          fontWeight: 700,
+                          color: "#111",
+                          marginBottom: 16,
+                        }}
+                      >
+                        Income Categories · {monthShort(month)}
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          padding: "0 0 10px",
+                          borderBottom: "1px solid #F2F2EE",
+                          marginBottom: 8,
+                        }}
+                      >
+                        {[
+                          "Category",
+                          ...(prev ? [monthShort(prev.month)] : []),
+                          monthShort(month),
+                          "% of Total",
+                          ...(prev ? ["% Diff"] : []),
+                        ].map((h, i) => (
+                          <div
+                            key={h}
+                            style={{
+                              flex: i === 0 ? 2 : 1,
+                              fontSize: 10,
+                              fontWeight: 600,
+                              color: "#bbb",
+                              letterSpacing: "0.07em",
+                              textAlign: i === 0 ? "left" : "right",
+                            }}
+                          >
+                            {h}
                           </div>
-                          {prev && (
-                            <div style={{ flex: 1, textAlign: "right", fontSize: 12, color: "#bbb" }}>
-                              {row.prevAmount > 0 ? formatRp(row.prevAmount) : "—"}
+                        ))}
+                      </div>
+                      {incCats.map((row, i) => {
+                        const pctDiff =
+                          row.prevAmount > 0
+                            ? Math.round(
+                                ((row.amount - row.prevAmount) /
+                                  row.prevAmount) *
+                                  100,
+                              )
+                            : null;
+                        return (
+                          <div
+                            key={i}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              padding: "10px 0",
+                              borderBottom:
+                                i < incCats.length - 1
+                                  ? "1px solid #F8F8F4"
+                                  : "none",
+                            }}
+                          >
+                            <div
+                              style={{
+                                flex: 2,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 8,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: 10,
+                                  height: 10,
+                                  borderRadius: "50%",
+                                  background: row.color,
+                                  flexShrink: 0,
+                                }}
+                              />
+                              <span
+                                style={{
+                                  fontSize: 13,
+                                  fontWeight: 500,
+                                  color: "#333",
+                                }}
+                              >
+                                {row.name}
+                              </span>
                             </div>
-                          )}
-                          <div style={{ flex: 1, textAlign: "right", fontSize: 13, fontWeight: 600, color: "#2A9D5C" }}>
-                            {formatRp(row.amount)}
-                          </div>
-                          <div style={{ flex: 1, textAlign: "right", fontSize: 12, color: "#888" }}>
-                            {totalIn > 0 ? Math.round((row.amount / totalIn) * 100) : 0}%
-                          </div>
-                          {prev && (
-                            <div style={{ flex: 1, textAlign: "right", fontSize: 12, fontWeight: 600, color: pctDiff == null ? "#bbb" : pctDiff > 0 ? "#2A9D5C" : "#E05C5C" }}>
-                              {pctDiff == null ? "new" : `${pctDiff > 0 ? "+" : ""}${pctDiff}%`}
+                            {prev && (
+                              <div
+                                style={{
+                                  flex: 1,
+                                  textAlign: "right",
+                                  fontSize: 12,
+                                  color: "#bbb",
+                                }}
+                              >
+                                {row.prevAmount > 0
+                                  ? formatRp(row.prevAmount)
+                                  : "—"}
+                              </div>
+                            )}
+                            <div
+                              style={{
+                                flex: 1,
+                                textAlign: "right",
+                                fontSize: 13,
+                                fontWeight: 600,
+                                color: "#2A9D5C",
+                              }}
+                            >
+                              {formatRp(row.amount)}
                             </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })()}
+                            <div
+                              style={{
+                                flex: 1,
+                                textAlign: "right",
+                                fontSize: 12,
+                                color: "#888",
+                              }}
+                            >
+                              {totalIn > 0
+                                ? Math.round((row.amount / totalIn) * 100)
+                                : 0}
+                              %
+                            </div>
+                            {prev && (
+                              <div
+                                style={{
+                                  flex: 1,
+                                  textAlign: "right",
+                                  fontSize: 12,
+                                  fontWeight: 600,
+                                  color:
+                                    pctDiff == null
+                                      ? "#bbb"
+                                      : pctDiff > 0
+                                        ? "#2A9D5C"
+                                        : "#E05C5C",
+                                }}
+                              >
+                                {pctDiff == null
+                                  ? "new"
+                                  : `${pctDiff > 0 ? "+" : ""}${pctDiff}%`}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
             </div>
           </>
         )}
 
         {!loading && !error && activeTab === "categories" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-          <div style={{ display: "flex", gap: 20 }}>
-            <div
-              style={{
-                background: "white",
-                borderRadius: 12,
-                padding: "22px 28px",
-                border: "1px solid #EEEEE8",
-                width: 300,
-                flexShrink: 0,
-              }}
-            >
+            <div style={{ display: "flex", gap: 20 }}>
               <div
                 style={{
-                  fontSize: 15,
-                  fontWeight: 700,
-                  color: "#111",
-                  marginBottom: 4,
+                  background: "white",
+                  borderRadius: 12,
+                  padding: "22px 28px",
+                  border: "1px solid #EEEEE8",
+                  width: 300,
+                  flexShrink: 0,
                 }}
               >
-                Outflow by Category
-              </div>
-              <div style={{ fontSize: 12, color: "#bbb", marginBottom: 20 }}>
-                {monthLabel(month)} · Total {formatRp(-totalOut)}
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  marginBottom: 24,
-                }}
-              >
-                <DonutChart items={cats} total={totalOut} />
-              </div>
-              {cats.map((c, i) => (
                 <div
-                  key={i}
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 700,
+                    color: "#111",
+                    marginBottom: 4,
+                  }}
+                >
+                  Outflow by Category
+                </div>
+                <div style={{ fontSize: 12, color: "#bbb", marginBottom: 20 }}>
+                  {monthLabel(month)} · Total {formatRp(-totalOut)}
+                </div>
+                <div
                   style={{
                     display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    marginBottom: 10,
+                    justifyContent: "center",
+                    marginBottom: 24,
                   }}
                 >
-                  <div
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: "50%",
-                      background: c.color,
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span style={{ fontSize: 13, color: "#333", flex: 1 }}>
-                    {c.name}
-                  </span>
-                  <span
-                    style={{ fontSize: 12, fontWeight: 600, color: "#888" }}
-                  >
-                    {totalOut > 0 ? Math.round((c.amount / totalOut) * 100) : 0}
-                    %
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 700,
-                      color: "#E05C5C",
-                      minWidth: 90,
-                      textAlign: "right",
-                    }}
-                  >
-                    {formatRp(-c.amount)}
-                  </span>
+                  <DonutChart items={cats} total={totalOut} />
                 </div>
-              ))}
-              {cats.length === 0 && (
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: "#bbb",
-                    textAlign: "center",
-                    marginTop: 20,
-                  }}
-                >
-                  No expenses this month
-                </div>
-              )}
-            </div>
-            <div style={{ flex: 1 }}>
-              {cats.map((cat, ci) => {
-                const pct =
-                  totalOut > 0 ? Math.round((cat.amount / totalOut) * 100) : 0;
-                return (
+                {cats.map((c, i) => (
                   <div
-                    key={ci}
+                    key={i}
                     style={{
-                      background: "white",
-                      borderRadius: 12,
-                      padding: "18px 22px",
-                      border: "1px solid #EEEEE8",
-                      marginBottom: 12,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      marginBottom: 10,
                     }}
                   >
                     <div
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        background: c.color,
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span style={{ fontSize: 13, color: "#333", flex: 1 }}>
+                      {c.name}
+                    </span>
+                    <span
+                      style={{ fontSize: 12, fontWeight: 600, color: "#888" }}
+                    >
+                      {totalOut > 0
+                        ? Math.round((c.amount / totalOut) * 100)
+                        : 0}
+                      %
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: "#E05C5C",
+                        minWidth: 90,
+                        textAlign: "right",
+                      }}
+                    >
+                      {formatRp(-c.amount)}
+                    </span>
+                  </div>
+                ))}
+                {cats.length === 0 && (
+                  <div
+                    style={{
+                      fontSize: 13,
+                      color: "#bbb",
+                      textAlign: "center",
+                      marginTop: 20,
+                    }}
+                  >
+                    No expenses this month
+                  </div>
+                )}
+              </div>
+              <div style={{ flex: 1 }}>
+                {cats.map((cat, ci) => {
+                  const pct =
+                    totalOut > 0
+                      ? Math.round((cat.amount / totalOut) * 100)
+                      : 0;
+                  return (
+                    <div
+                      key={ci}
+                      style={{
+                        background: "white",
+                        borderRadius: 12,
+                        padding: "18px 22px",
+                        border: "1px solid #EEEEE8",
                         marginBottom: 12,
                       }}
                     >
                       <div
                         style={{
-                          width: 12,
-                          height: 12,
-                          borderRadius: "50%",
-                          background: cat.color,
-                          flexShrink: 0,
-                        }}
-                      />
-                      <span
-                        style={{
-                          fontSize: 14,
-                          fontWeight: 700,
-                          color: "#111",
-                          flex: 1,
-                        }}
-                      >
-                        {cat.name}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: 13,
-                          fontWeight: 700,
-                          color: "#E05C5C",
-                        }}
-                      >
-                        {formatRp(-cat.amount)}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: 11,
-                          padding: "2px 8px",
-                          borderRadius: 10,
-                          background: "#F5F5F2",
-                          color: "#888",
-                        }}
-                      >
-                        {pct}% of total
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        height: 6,
-                        borderRadius: 3,
-                        background: "#F2F2EE",
-                        overflow: "hidden",
-                        marginBottom: 10,
-                      }}
-                    >
-                      <div
-                        style={{
-                          height: "100%",
-                          width: `${pct}%`,
-                          background: cat.color,
-                          borderRadius: 3,
-                          transition: "width 0.4s ease",
-                        }}
-                      />
-                    </div>
-                    {cat.subs.map((s, si) => (
-                      <div
-                        key={si}
-                        style={{
                           display: "flex",
                           alignItems: "center",
-                          gap: 8,
-                          padding: "5px 0",
+                          gap: 10,
+                          marginBottom: 12,
                         }}
                       >
                         <div
                           style={{
-                            width: 4,
-                            height: 4,
+                            width: 12,
+                            height: 12,
                             borderRadius: "50%",
-                            background: "#ddd",
+                            background: cat.color,
                             flexShrink: 0,
                           }}
                         />
-                        <span style={{ fontSize: 12, color: "#888", flex: 1 }}>
-                          {s.name}
-                        </span>
-                        <span style={{ fontSize: 11, color: "#bbb" }}>
-                          {cat.amount > 0
-                            ? Math.round((s.amount / cat.amount) * 100)
-                            : 0}
-                          %
+                        <span
+                          style={{
+                            fontSize: 14,
+                            fontWeight: 700,
+                            color: "#111",
+                            flex: 1,
+                          }}
+                        >
+                          {cat.name}
                         </span>
                         <span
                           style={{
-                            fontSize: 12,
-                            fontWeight: 500,
-                            color: "#aaa",
-                            minWidth: 70,
-                            textAlign: "right",
+                            fontSize: 13,
+                            fontWeight: 700,
+                            color: "#E05C5C",
                           }}
                         >
-                          {formatRp(-s.amount)}
+                          {formatRp(-cat.amount)}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 11,
+                            padding: "2px 8px",
+                            borderRadius: 10,
+                            background: "#F5F5F2",
+                            color: "#888",
+                          }}
+                        >
+                          {pct}% of total
                         </span>
                       </div>
-                    ))}
-                    {cat.subs.length === 0 && (
                       <div
-                        style={{ fontSize: 12, color: "#ddd", paddingTop: 4 }}
+                        style={{
+                          height: 6,
+                          borderRadius: 3,
+                          background: "#F2F2EE",
+                          overflow: "hidden",
+                          marginBottom: 10,
+                        }}
                       >
-                        No subcategory breakdown
+                        <div
+                          style={{
+                            height: "100%",
+                            width: `${pct}%`,
+                            background: cat.color,
+                            borderRadius: 3,
+                            transition: "width 0.4s ease",
+                          }}
+                        />
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-              {cats.length === 0 && (
-                <div
-                  style={{
-                    background: "white",
-                    borderRadius: 12,
-                    padding: "40px",
-                    border: "1px solid #EEEEE8",
-                    textAlign: "center",
-                    color: "#bbb",
-                    fontSize: 14,
-                  }}
-                >
-                  No expenses recorded for {monthLabel(month)}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Inflow by category */}
-          {(data?.incomeBreakdown ?? []).length > 0 && (() => {
-            const incCats = data!.incomeBreakdown.map((c, i) => ({ ...c, color: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }));
-            const totalIn = incCats.reduce((s, c) => s + c.amount, 0);
-            return (
-              <div style={{ display: "flex", gap: 20 }}>
-                <div style={{ background: "white", borderRadius: 12, padding: "22px 28px", border: "1px solid #EEEEE8", width: 300, flexShrink: 0 }}>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#111", marginBottom: 4 }}>Inflow by Category</div>
-                  <div style={{ fontSize: 12, color: "#bbb", marginBottom: 20 }}>
-                    {monthLabel(month)} · Total {formatRp(totalIn)}
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
-                    <DonutChart items={incCats} total={totalIn} />
-                  </div>
-                  {incCats.map((c, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                      <div style={{ width: 10, height: 10, borderRadius: "50%", background: c.color, flexShrink: 0 }}/>
-                      <span style={{ fontSize: 13, color: "#333", flex: 1 }}>{c.name}</span>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: "#888" }}>
-                        {totalIn > 0 ? Math.round((c.amount / totalIn) * 100) : 0}%
-                      </span>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: "#2A9D5C", minWidth: 90, textAlign: "right" }}>
-                        {formatRp(c.amount)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ flex: 1 }}>
-                  {incCats.map((cat, ci) => {
-                    const pct = totalIn > 0 ? Math.round((cat.amount / totalIn) * 100) : 0;
-                    return (
-                      <div key={ci} style={{ background: "white", borderRadius: 12, padding: "18px 22px", border: "1px solid #EEEEE8", marginBottom: 12 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                          <div style={{ width: 12, height: 12, borderRadius: "50%", background: cat.color, flexShrink: 0 }}/>
-                          <span style={{ fontSize: 14, fontWeight: 700, color: "#111", flex: 1 }}>{cat.name}</span>
-                          <span style={{ fontSize: 13, fontWeight: 700, color: "#2A9D5C" }}>{formatRp(cat.amount)}</span>
-                          <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 10, background: "#F5F5F2", color: "#888" }}>
-                            {pct}% of total
+                      {cat.subs.map((s, si) => (
+                        <div
+                          key={si}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            padding: "5px 0",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 4,
+                              height: 4,
+                              borderRadius: "50%",
+                              background: "#ddd",
+                              flexShrink: 0,
+                            }}
+                          />
+                          <span
+                            style={{ fontSize: 12, color: "#888", flex: 1 }}
+                          >
+                            {s.name}
+                          </span>
+                          <span style={{ fontSize: 11, color: "#bbb" }}>
+                            {cat.amount > 0
+                              ? Math.round((s.amount / cat.amount) * 100)
+                              : 0}
+                            %
+                          </span>
+                          <span
+                            style={{
+                              fontSize: 12,
+                              fontWeight: 500,
+                              color: "#aaa",
+                              minWidth: 70,
+                              textAlign: "right",
+                            }}
+                          >
+                            {formatRp(-s.amount)}
                           </span>
                         </div>
-                        <div style={{ height: 6, borderRadius: 3, background: "#F2F2EE", overflow: "hidden", marginBottom: 10 }}>
-                          <div style={{ height: "100%", width: `${pct}%`, background: cat.color, borderRadius: 3, transition: "width 0.4s ease" }}/>
+                      ))}
+                      {cat.subs.length === 0 && (
+                        <div
+                          style={{ fontSize: 12, color: "#ddd", paddingTop: 4 }}
+                        >
+                          No subcategory breakdown
                         </div>
-                        {cat.subs.map((s, si) => (
-                          <div key={si} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0" }}>
-                            <div style={{ width: 4, height: 4, borderRadius: "50%", background: "#ddd", flexShrink: 0 }}/>
-                            <span style={{ fontSize: 12, color: "#888", flex: 1 }}>{s.name}</span>
-                            <span style={{ fontSize: 11, color: "#bbb" }}>
-                              {cat.amount > 0 ? Math.round((s.amount / cat.amount) * 100) : 0}%
-                            </span>
-                            <span style={{ fontSize: 12, fontWeight: 500, color: "#aaa", minWidth: 70, textAlign: "right" }}>
-                              {formatRp(s.amount)}
-                            </span>
-                          </div>
-                        ))}
-                        {cat.subs.length === 0 && (
-                          <div style={{ fontSize: 12, color: "#ddd", paddingTop: 4 }}>No subcategory breakdown</div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                      )}
+                    </div>
+                  );
+                })}
+                {cats.length === 0 && (
+                  <div
+                    style={{
+                      background: "white",
+                      borderRadius: 12,
+                      padding: "40px",
+                      border: "1px solid #EEEEE8",
+                      textAlign: "center",
+                      color: "#bbb",
+                      fontSize: 14,
+                    }}
+                  >
+                    No expenses recorded for {monthLabel(month)}
+                  </div>
+                )}
               </div>
-            );
-          })()}
+            </div>
+
+            {/* Inflow by category */}
+            {(data?.incomeBreakdown ?? []).length > 0 &&
+              (() => {
+                const incCats = data!.incomeBreakdown.map((c, i) => ({
+                  ...c,
+                  color: CATEGORY_COLORS[i % CATEGORY_COLORS.length],
+                }));
+                const totalIn = incCats.reduce((s, c) => s + c.amount, 0);
+                return (
+                  <div style={{ display: "flex", gap: 20 }}>
+                    <div
+                      style={{
+                        background: "white",
+                        borderRadius: 12,
+                        padding: "22px 28px",
+                        border: "1px solid #EEEEE8",
+                        width: 300,
+                        flexShrink: 0,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 15,
+                          fontWeight: 700,
+                          color: "#111",
+                          marginBottom: 4,
+                        }}
+                      >
+                        Inflow by Category
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: "#bbb",
+                          marginBottom: 20,
+                        }}
+                      >
+                        {monthLabel(month)} · Total {formatRp(totalIn)}
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          marginBottom: 24,
+                        }}
+                      >
+                        <DonutChart items={incCats} total={totalIn} />
+                      </div>
+                      {incCats.map((c, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            marginBottom: 10,
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: "50%",
+                              background: c.color,
+                              flexShrink: 0,
+                            }}
+                          />
+                          <span
+                            style={{ fontSize: 13, color: "#333", flex: 1 }}
+                          >
+                            {c.name}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: 12,
+                              fontWeight: 600,
+                              color: "#888",
+                            }}
+                          >
+                            {totalIn > 0
+                              ? Math.round((c.amount / totalIn) * 100)
+                              : 0}
+                            %
+                          </span>
+                          <span
+                            style={{
+                              fontSize: 12,
+                              fontWeight: 700,
+                              color: "#2A9D5C",
+                              minWidth: 90,
+                              textAlign: "right",
+                            }}
+                          >
+                            {formatRp(c.amount)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      {incCats.map((cat, ci) => {
+                        const pct =
+                          totalIn > 0
+                            ? Math.round((cat.amount / totalIn) * 100)
+                            : 0;
+                        return (
+                          <div
+                            key={ci}
+                            style={{
+                              background: "white",
+                              borderRadius: 12,
+                              padding: "18px 22px",
+                              border: "1px solid #EEEEE8",
+                              marginBottom: 12,
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 10,
+                                marginBottom: 12,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: 12,
+                                  height: 12,
+                                  borderRadius: "50%",
+                                  background: cat.color,
+                                  flexShrink: 0,
+                                }}
+                              />
+                              <span
+                                style={{
+                                  fontSize: 14,
+                                  fontWeight: 700,
+                                  color: "#111",
+                                  flex: 1,
+                                }}
+                              >
+                                {cat.name}
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: 13,
+                                  fontWeight: 700,
+                                  color: "#2A9D5C",
+                                }}
+                              >
+                                {formatRp(cat.amount)}
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: 11,
+                                  padding: "2px 8px",
+                                  borderRadius: 10,
+                                  background: "#F5F5F2",
+                                  color: "#888",
+                                }}
+                              >
+                                {pct}% of total
+                              </span>
+                            </div>
+                            <div
+                              style={{
+                                height: 6,
+                                borderRadius: 3,
+                                background: "#F2F2EE",
+                                overflow: "hidden",
+                                marginBottom: 10,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  height: "100%",
+                                  width: `${pct}%`,
+                                  background: cat.color,
+                                  borderRadius: 3,
+                                  transition: "width 0.4s ease",
+                                }}
+                              />
+                            </div>
+                            {cat.subs.map((s, si) => (
+                              <div
+                                key={si}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 8,
+                                  padding: "5px 0",
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    width: 4,
+                                    height: 4,
+                                    borderRadius: "50%",
+                                    background: "#ddd",
+                                    flexShrink: 0,
+                                  }}
+                                />
+                                <span
+                                  style={{
+                                    fontSize: 12,
+                                    color: "#888",
+                                    flex: 1,
+                                  }}
+                                >
+                                  {s.name}
+                                </span>
+                                <span style={{ fontSize: 11, color: "#bbb" }}>
+                                  {cat.amount > 0
+                                    ? Math.round((s.amount / cat.amount) * 100)
+                                    : 0}
+                                  %
+                                </span>
+                                <span
+                                  style={{
+                                    fontSize: 12,
+                                    fontWeight: 500,
+                                    color: "#aaa",
+                                    minWidth: 70,
+                                    textAlign: "right",
+                                  }}
+                                >
+                                  {formatRp(s.amount)}
+                                </span>
+                              </div>
+                            ))}
+                            {cat.subs.length === 0 && (
+                              <div
+                                style={{
+                                  fontSize: 12,
+                                  color: "#ddd",
+                                  paddingTop: 4,
+                                }}
+                              >
+                                No subcategory breakdown
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
           </div>
         )}
       </div>

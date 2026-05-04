@@ -256,7 +256,37 @@ export async function getAnalytics(req: AuthRequest, res: Response, next: NextFu
       incomeDiff,
     };
 
-    res.json({ data: { monthly: monthlyData, categoryBreakdown, incomeBreakdown, insights } });
+    // Events running during the selected month (startDate <= selTo AND (endDate >= selFrom OR endDate is null))
+    const runningEvents = await prisma.event.findMany({
+      where: {
+        userId: req.userId,
+        startDate: { lte: selTo },
+        OR: [{ endDate: { gte: selFrom } }, { endDate: null }],
+      },
+      include: { transactions: { where: { date: { gte: selFrom, lte: selTo } } } },
+    });
+
+    const runningEventCount = runningEvents.length;
+
+    const eventTotals = runningEvents.map(ev => ({
+      id: ev.id,
+      name: ev.name,
+      total: ev.transactions.reduce((s, t) => s + t.amount, 0),
+    }));
+    const mostExpensiveEvent = eventTotals.sort((a, b) => b.total - a.total)[0] ?? null;
+
+    res.json({
+      data: {
+        monthly: monthlyData,
+        categoryBreakdown,
+        incomeBreakdown,
+        insights,
+        eventSummary: {
+          runningEventCount,
+          mostExpensiveEvent: mostExpensiveEvent ? { name: mostExpensiveEvent.name, total: mostExpensiveEvent.total } : null,
+        },
+      },
+    });
   } catch (err) {
     next(err);
   }
