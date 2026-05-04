@@ -157,7 +157,7 @@ const css = `
   .tx-subcat-mobile  { display: none !important; }
   @media (max-width: 480px) {
     .tx-subcat-desktop { display: none !important; }
-    .tx-subcat-mobile  { display: block !important; }
+    .tx-subcat-mobile  { display: flex !important; }
     .tx-header-title-row > div:first-child { display: none; }
     .tx-monthnav-mobile { width: 100%; }
     .tx-monthnav-mobile > div { width: 100%; justify-content: space-between; }
@@ -956,24 +956,53 @@ export default function TransactionsPage() {
                         >
                           {tx.category.name}
                         </div>
-                        {tx.subCategory && (
+                        {(tx.subCategory || tx.event) && (
                           <div
                             className="tx-subcat-mobile mt-0.5 mb-1"
                             style={{
-                              display: "none",
-                              padding: "2px 8px",
-                              borderRadius: 20,
-                              background: "#F2F2EE",
-                              fontSize: 11,
-                              color: "#888",
-                              width: "fit-content",
-                              maxWidth: "100%",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
+                              display: "flex",
+                              gap: 4,
+                              flexWrap: "wrap",
+                              marginTop: 2,
+                              marginBottom: 2,
                             }}
                           >
-                            {tx.subCategory.name}
+                            {tx.subCategory && (
+                              <span
+                                className="mr-1"
+                                style={{
+                                  padding: "2px 8px",
+                                  borderRadius: 20,
+                                  background: "#F2F2EE",
+                                  fontSize: 11,
+                                  color: "#888",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                  maxWidth: 120,
+                                }}
+                              >
+                                {tx.subCategory.name}
+                              </span>
+                            )}
+                            {tx.event && (
+                              <span
+                                style={{
+                                  padding: "2px 8px",
+                                  borderRadius: 20,
+                                  background: "#EEF4FF",
+                                  fontSize: 11,
+                                  color: "#5C8AE0",
+                                  fontWeight: 600,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                  maxWidth: 120,
+                                }}
+                              >
+                                {tx.event.name}
+                              </span>
+                            )}
                           </div>
                         )}
                         <div
@@ -988,23 +1017,46 @@ export default function TransactionsPage() {
                           {tx.note || "—"}
                         </div>
                       </div>
-                      {tx.subCategory && (
+                      {(tx.subCategory || tx.event) && (
                         <div
                           className="tx-subcat-desktop"
-                          style={{
-                            padding: "3px 8px",
-                            borderRadius: 20,
-                            background: "#F2F2EE",
-                            fontSize: 11,
-                            color: "#888",
-                            flexShrink: 0,
-                            maxWidth: 100,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
+                          style={{ display: "flex", gap: 6, flexShrink: 0 }}
                         >
-                          {tx.subCategory.name}
+                          {tx.subCategory && (
+                            <span
+                              style={{
+                                padding: "3px 8px",
+                                borderRadius: 20,
+                                background: "#F2F2EE",
+                                fontSize: 11,
+                                color: "#888",
+                                maxWidth: 100,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {tx.subCategory.name}
+                            </span>
+                          )}
+                          {tx.event && (
+                            <span
+                              style={{
+                                padding: "3px 8px",
+                                borderRadius: 20,
+                                background: "#EEF4FF",
+                                fontSize: 11,
+                                color: "#5C8AE0",
+                                fontWeight: 600,
+                                maxWidth: 120,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {tx.event.name}
+                            </span>
+                          )}
                         </div>
                       )}
                       <div

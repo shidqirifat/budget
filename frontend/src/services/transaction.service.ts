@@ -74,4 +74,5 @@ export const transactionService = {
   create: (data: TransactionPayload) => api.post<{ data: Transaction }>('/transactions', data),
   update: (id: string, data: Partial<TransactionPayload>) => api.put<{ data: Transaction }>(`/transactions/${id}`, data),
   remove: (id: string) => api.delete(`/transactions/${id}`),
+  patchEvent: (id: string, eventId: string | null) => api.patch<{ data: Transaction }>(`/transactions/${id}/event`, { eventId }),
 };

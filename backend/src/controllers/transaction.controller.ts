@@ -262,6 +262,25 @@ export async function getAnalytics(req: AuthRequest, res: Response, next: NextFu
   }
 }
 
+export async function patchEvent(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const existing = await prisma.transaction.findUnique({ where: { id: req.params.id } });
+    if (!existing || existing.userId !== req.userId) {
+      res.status(403).json({ error: 'Forbidden' });
+      return;
+    }
+    const { eventId } = req.body as { eventId: string | null };
+    const transaction = await prisma.transaction.update({
+      where: { id: req.params.id },
+      data: { eventId: eventId ?? null },
+      include: { type: true, category: true, subCategory: true, event: true },
+    });
+    res.json({ data: transaction });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function remove(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const existing = await prisma.transaction.findUnique({ where: { id: req.params.id } });

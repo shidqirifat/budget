@@ -752,11 +752,18 @@ export default function AddTransactionPage() {
                 }}
               >
                 <option value="">No event</option>
-                {events.map((ev) => (
-                  <option key={ev.id} value={ev.id}>
-                    {ev.name}
-                  </option>
-                ))}
+                {events
+                  .filter((ev) => {
+                    const start = ev.startDate.slice(0, 10);
+                    const end = ev.endDate ? ev.endDate.slice(0, 10) : '';
+                    const today = new Date().toISOString().slice(0, 10);
+                    return start <= today && (!end || today <= end);
+                  })
+                  .map((ev) => (
+                    <option key={ev.id} value={ev.id}>
+                      {ev.name}
+                    </option>
+                  ))}
               </select>
             </div>
           </div>
