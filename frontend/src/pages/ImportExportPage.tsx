@@ -99,6 +99,39 @@ const css = `
   .ie-export-card { transition: border-color 0.12s; }
   .ie-export-card:hover { border-color: #D1FF19 !important; }
   .ie-dl-btn:hover { opacity: 0.85; }
+
+  .ie-page { padding: 20px 32px 32px; }
+  .ie-header { padding: 28px 32px 0; }
+  .ie-tabbar { padding: 18px 32px 0; }
+  .ie-body { display: flex; gap: 20px; flex-direction: row; }
+  .ie-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  .ie-guide { width: 256px; flex-shrink: 0; position: sticky; top: 0; align-self: flex-start; max-height: calc(100vh - 160px); display: flex; flex-direction: column; }
+  .ie-col-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .ie-export-body { flex: 1; display: flex; gap: 20px; align-items: flex-start; min-width: 0; }
+  .ie-export-left { flex: 1; }
+  .ie-export-right { width: 256px; flex-shrink: 0; }
+  .ie-review-table { overflow-x: auto; }
+  .ie-template-card { display: flex; align-items: center; gap: 14px; flex-wrap: nowrap; }
+  .ie-template-card .ie-dl-btn { flex-shrink: 0; }
+  @media (max-width: 480px) {
+    .ie-template-card { flex-wrap: wrap; }
+    .ie-template-card .ie-dl-btn { width: 100%; justify-content: center; }
+  }
+
+  @media (max-width: 768px) {
+    .ie-page { padding: 12px 16px 24px; }
+    .ie-header { padding: 20px 16px 0; }
+    .ie-tabbar { padding: 14px 16px 0; }
+    .ie-body { flex-direction: column; }
+    .ie-guide { width: 100%; position: static; max-height: none; }
+    .ie-col-grid { grid-template-columns: repeat(2, 1fr); }
+    .ie-export-body { flex-direction: column; }
+    .ie-export-right { width: 100%; }
+  }
+
+  @media (max-width: 480px) {
+    .ie-col-grid { grid-template-columns: 1fr; }
+  }
 `;
 
 // ─── parsed row preview ──────────────────────────────────────────────────────
@@ -243,7 +276,7 @@ export default function ImportExportPage() {
 
     XLSX.utils.book_append_sheet(wb, ws2, "Categories");
 
-    XLSX.writeFile(wb, "budget_import_template.xlsx");
+    XLSX.writeFile(wb, "template.xlsx");
   }, [expenseCategories, incomeCategories]);
 
   // ─── file handling ────────────────────────────────────────────────────────
@@ -373,7 +406,7 @@ export default function ImportExportPage() {
         }}
       >
         {/* Header */}
-        <div style={{ padding: "28px 32px 0", flexShrink: 0 }}>
+        <div className="ie-header" style={{ flexShrink: 0 }}>
           <h1
             style={{
               fontSize: 22,
@@ -391,7 +424,7 @@ export default function ImportExportPage() {
         </div>
 
         {/* Tab bar */}
-        <div style={{ padding: "18px 32px 0", flexShrink: 0 }}>
+        <div className="ie-tabbar" style={{ flexShrink: 0 }}>
           <div
             style={{
               display: "flex",
@@ -430,28 +463,12 @@ export default function ImportExportPage() {
         </div>
 
         {/* Body */}
-        <div
-          style={{
-            flex: 1,
-            overflow: "hidden",
-            padding: "20px 32px 32px",
-            display: "flex",
-            gap: 20,
-          }}
-        >
+        <div className="ie-page ie-body" style={{ flex: 1, overflowY: "auto" }}>
           {/* ── IMPORT TAB ─────────────────────────────────────────── */}
           {tab === "import" && (
             <>
               {/* Left: main flow */}
-              <div
-                style={{
-                  flex: 1,
-                  overflowY: "auto",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 16,
-                }}
-              >
+              <div className="ie-main">
                 {/* Step 1: template */}
                 <div
                   style={{
@@ -470,14 +487,12 @@ export default function ImportExportPage() {
                     style={{ display: "flex", alignItems: "center", gap: 20 }}
                   >
                     <div
+                      className="ie-template-card"
                       style={{
                         flex: 1,
                         background: "#F5F5F2",
                         borderRadius: 10,
                         padding: "18px 20px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 14,
                         border: "1px solid #EEEEE8",
                       }}
                     >
@@ -539,7 +554,7 @@ export default function ImportExportPage() {
                             marginBottom: 2,
                           }}
                         >
-                          budget_import_template.xlsx
+                          template.xlsx
                         </div>
                         <div
                           style={{
@@ -608,13 +623,7 @@ export default function ImportExportPage() {
                     >
                       Column Reference
                     </div>
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(3, 1fr)",
-                        gap: 8,
-                      }}
-                    >
+                    <div className="ie-col-grid">
                       {[
                         {
                           col: "date",
@@ -898,286 +907,290 @@ export default function ImportExportPage() {
 
                     {/* Table */}
                     <div
-                      style={{
-                        borderRadius: 10,
-                        overflow: "hidden",
-                        border: "1px solid #EEEEE8",
-                      }}
+                      className="ie-review-table"
+                      style={{ borderRadius: 10, border: "1px solid #EEEEE8" }}
                     >
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns:
-                            "32px 100px 1fr 120px 100px 80px 80px",
-                          background: "#F8F8F5",
-                          padding: "9px 14px",
-                          borderBottom: "1px solid #EEEEE8",
-                        }}
-                      >
-                        {[
-                          "",
-                          "Date",
-                          "Note",
-                          "Category",
-                          "Sub",
-                          "Amount",
-                          "Status",
-                        ].map((h, i) => (
-                          <div
-                            key={i}
-                            style={{
-                              fontSize: 10,
-                              fontWeight: 600,
-                              color: "#bbb",
-                              letterSpacing: "0.07em",
-                              textAlign: i >= 5 ? "right" : "left",
-                            }}
-                          >
-                            {h}
-                          </div>
-                        ))}
-                      </div>
-
-                      {reviewRows.map((row, i) => {
-                        const isErr = row.status === "error";
-                        const isOk = row.status === "ok";
-                        const amtNum = parseFloat(row.amount);
-                        const isIncome =
-                          row.type === "income" || row.type === "inflow";
-                        return (
-                          <div key={i}>
+                      <div style={{ minWidth: 560 }}>
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns:
+                              "32px 100px 1fr 120px 100px 80px 80px",
+                            background: "#F8F8F5",
+                            padding: "9px 14px",
+                            borderBottom: "1px solid #EEEEE8",
+                          }}
+                        >
+                          {[
+                            "",
+                            "Date",
+                            "Note",
+                            "Category",
+                            "Sub",
+                            "Amount",
+                            "Status",
+                          ].map((h, i) => (
                             <div
+                              key={i}
                               style={{
-                                display: "grid",
-                                gridTemplateColumns:
-                                  "32px 100px 1fr 120px 100px 80px 80px",
-                                padding: "11px 14px",
-                                alignItems: "center",
-                                background: isErr
-                                  ? "#FFFAF9"
-                                  : i % 2 === 0
-                                    ? "white"
-                                    : "#FAFAF7",
-                                borderBottom:
-                                  i < reviewRows.length - 1
-                                    ? "1px solid #F2F2EE"
-                                    : "none",
-                                opacity:
-                                  parseStage === "done" && isErr ? 0.45 : 1,
+                                fontSize: 10,
+                                fontWeight: 600,
+                                color: "#bbb",
+                                letterSpacing: "0.07em",
+                                textAlign: i >= 5 ? "right" : "left",
                               }}
                             >
-                              <div
-                                style={{
-                                  fontSize: 11,
-                                  color: "#ccc",
-                                  fontVariantNumeric: "tabular-nums",
-                                }}
-                              >
-                                {i + 1}
-                              </div>
-                              <div
-                                style={{
-                                  fontSize: 12,
-                                  color:
-                                    isErr && !row.date ? "#E05C5C" : "#555",
-                                  fontVariantNumeric: "tabular-nums",
-                                }}
-                              >
-                                {row.date || (
-                                  <span
-                                    style={{
-                                      color: "#E05C5C",
-                                      fontStyle: "italic",
-                                    }}
-                                  >
-                                    missing
-                                  </span>
-                                )}
-                              </div>
-                              <div
-                                style={{
-                                  fontSize: 12,
-                                  color: "#333",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                  paddingRight: 12,
-                                }}
-                              >
-                                {row.note || "—"}
-                              </div>
-                              <div
-                                style={{
-                                  fontSize: 12,
-                                  color:
-                                    isErr && !row.category ? "#E05C5C" : "#444",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {row.category || (
-                                  <span
-                                    style={{
-                                      fontStyle: "italic",
-                                      color: "#E05C5C",
-                                    }}
-                                  >
-                                    missing
-                                  </span>
-                                )}
-                              </div>
-                              <div
-                                style={{
-                                  fontSize: 11,
-                                  color: "#999",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {row.sub_category || "—"}
-                              </div>
-                              <div
-                                style={{
-                                  fontSize: 12,
-                                  fontWeight: 700,
-                                  textAlign: "right",
-                                  color: isNaN(amtNum)
-                                    ? "#E05C5C"
-                                    : isIncome
-                                      ? "#2A9D5C"
-                                      : "#E05C5C",
-                                  fontVariantNumeric: "tabular-nums",
-                                }}
-                              >
-                                {isNaN(amtNum) ? (
-                                  <span
-                                    style={{
-                                      fontStyle: "italic",
-                                      fontWeight: 400,
-                                    }}
-                                  >
-                                    invalid
-                                  </span>
-                                ) : (
-                                  formatCurrency(isIncome ? amtNum : -amtNum)
-                                )}
-                              </div>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "flex-end",
-                                }}
-                              >
-                                {isErr ? (
-                                  <span
-                                    style={{
-                                      fontSize: 10,
-                                      fontWeight: 700,
-                                      color: "#E05C5C",
-                                      background: "#FDF0F0",
-                                      padding: "3px 9px",
-                                      borderRadius: 10,
-                                      letterSpacing: "0.04em",
-                                    }}
-                                  >
-                                    ERROR
-                                  </span>
-                                ) : isOk ? (
-                                  <span
-                                    style={{
-                                      fontSize: 10,
-                                      fontWeight: 700,
-                                      color: "#2A9D5C",
-                                      background: "#F0FDF5",
-                                      padding: "3px 9px",
-                                      borderRadius: 10,
-                                      letterSpacing: "0.04em",
-                                    }}
-                                  >
-                                    IMPORTED
-                                  </span>
-                                ) : (
-                                  <span
-                                    style={{
-                                      fontSize: 10,
-                                      fontWeight: 700,
-                                      color: "#888",
-                                      background: "#F0F0EA",
-                                      padding: "3px 9px",
-                                      borderRadius: 10,
-                                      letterSpacing: "0.04em",
-                                    }}
-                                  >
-                                    READY
-                                  </span>
-                                )}
-                              </div>
+                              {h}
                             </div>
+                          ))}
+                        </div>
 
-                            {/* Error detail row */}
-                            {isErr && (row.serverErrors ?? []).length > 0 && (
+                        {reviewRows.map((row, i) => {
+                          const isErr = row.status === "error";
+                          const isOk = row.status === "ok";
+                          const amtNum = parseFloat(row.amount);
+                          const isIncome =
+                            row.type === "income" || row.type === "inflow";
+                          return (
+                            <div key={i}>
                               <div
                                 style={{
-                                  background: "#FDF5F5",
-                                  padding: "6px 14px 8px 46px",
+                                  display: "grid",
+                                  gridTemplateColumns:
+                                    "32px 100px 1fr 120px 100px 80px 80px",
+                                  padding: "11px 14px",
+                                  alignItems: "center",
+                                  background: isErr
+                                    ? "#FFFAF9"
+                                    : i % 2 === 0
+                                      ? "white"
+                                      : "#FAFAF7",
                                   borderBottom:
                                     i < reviewRows.length - 1
                                       ? "1px solid #F2F2EE"
                                       : "none",
-                                  display: "flex",
-                                  gap: 8,
-                                  flexWrap: "wrap",
+                                  opacity:
+                                    parseStage === "done" && isErr ? 0.45 : 1,
                                 }}
                               >
-                                {(row.serverErrors ?? []).map((e, ei) => (
-                                  <span
-                                    key={ei}
-                                    style={{
-                                      fontSize: 11,
-                                      color: "#C04040",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: 4,
-                                    }}
-                                  >
-                                    <svg
-                                      width="10"
-                                      height="10"
-                                      viewBox="0 0 10 10"
-                                      fill="none"
+                                <div
+                                  style={{
+                                    fontSize: 11,
+                                    color: "#ccc",
+                                    fontVariantNumeric: "tabular-nums",
+                                  }}
+                                >
+                                  {i + 1}
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: 12,
+                                    color:
+                                      isErr && !row.date ? "#E05C5C" : "#555",
+                                    fontVariantNumeric: "tabular-nums",
+                                  }}
+                                >
+                                  {row.date || (
+                                    <span
+                                      style={{
+                                        color: "#E05C5C",
+                                        fontStyle: "italic",
+                                      }}
                                     >
-                                      <circle
-                                        cx="5"
-                                        cy="5"
-                                        r="4.5"
-                                        stroke="#C04040"
-                                        strokeWidth="1"
-                                      />
-                                      <path
-                                        d="M5 3v2.5M5 7h.01"
-                                        stroke="#C04040"
-                                        strokeWidth="1.2"
-                                        strokeLinecap="round"
-                                      />
-                                    </svg>
-                                    {e}
-                                    {ei <
-                                      (row.serverErrors ?? []).length - 1 && (
-                                      <span
-                                        style={{ color: "#ecc", marginLeft: 2 }}
-                                      >
-                                        ·
-                                      </span>
-                                    )}
-                                  </span>
-                                ))}
+                                      missing
+                                    </span>
+                                  )}
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: 12,
+                                    color: "#333",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                    paddingRight: 12,
+                                  }}
+                                >
+                                  {row.note || "—"}
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: 12,
+                                    color:
+                                      isErr && !row.category
+                                        ? "#E05C5C"
+                                        : "#444",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  {row.category || (
+                                    <span
+                                      style={{
+                                        fontStyle: "italic",
+                                        color: "#E05C5C",
+                                      }}
+                                    >
+                                      missing
+                                    </span>
+                                  )}
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: 11,
+                                    color: "#999",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  {row.sub_category || "—"}
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: 12,
+                                    fontWeight: 700,
+                                    textAlign: "right",
+                                    color: isNaN(amtNum)
+                                      ? "#E05C5C"
+                                      : isIncome
+                                        ? "#2A9D5C"
+                                        : "#E05C5C",
+                                    fontVariantNumeric: "tabular-nums",
+                                  }}
+                                >
+                                  {isNaN(amtNum) ? (
+                                    <span
+                                      style={{
+                                        fontStyle: "italic",
+                                        fontWeight: 400,
+                                      }}
+                                    >
+                                      invalid
+                                    </span>
+                                  ) : (
+                                    formatCurrency(isIncome ? amtNum : -amtNum)
+                                  )}
+                                </div>
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    justifyContent: "flex-end",
+                                  }}
+                                >
+                                  {isErr ? (
+                                    <span
+                                      style={{
+                                        fontSize: 10,
+                                        fontWeight: 700,
+                                        color: "#E05C5C",
+                                        background: "#FDF0F0",
+                                        padding: "3px 9px",
+                                        borderRadius: 10,
+                                        letterSpacing: "0.04em",
+                                      }}
+                                    >
+                                      ERROR
+                                    </span>
+                                  ) : isOk ? (
+                                    <span
+                                      style={{
+                                        fontSize: 10,
+                                        fontWeight: 700,
+                                        color: "#2A9D5C",
+                                        background: "#F0FDF5",
+                                        padding: "3px 9px",
+                                        borderRadius: 10,
+                                        letterSpacing: "0.04em",
+                                      }}
+                                    >
+                                      IMPORTED
+                                    </span>
+                                  ) : (
+                                    <span
+                                      style={{
+                                        fontSize: 10,
+                                        fontWeight: 700,
+                                        color: "#888",
+                                        background: "#F0F0EA",
+                                        padding: "3px 9px",
+                                        borderRadius: 10,
+                                        letterSpacing: "0.04em",
+                                      }}
+                                    >
+                                      READY
+                                    </span>
+                                  )}
+                                </div>
                               </div>
-                            )}
-                          </div>
-                        );
-                      })}
+
+                              {/* Error detail row */}
+                              {isErr && (row.serverErrors ?? []).length > 0 && (
+                                <div
+                                  style={{
+                                    background: "#FDF5F5",
+                                    padding: "6px 14px 8px 46px",
+                                    borderBottom:
+                                      i < reviewRows.length - 1
+                                        ? "1px solid #F2F2EE"
+                                        : "none",
+                                    display: "flex",
+                                    gap: 8,
+                                    flexWrap: "wrap",
+                                  }}
+                                >
+                                  {(row.serverErrors ?? []).map((e, ei) => (
+                                    <span
+                                      key={ei}
+                                      style={{
+                                        fontSize: 11,
+                                        color: "#C04040",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 4,
+                                      }}
+                                    >
+                                      <svg
+                                        width="10"
+                                        height="10"
+                                        viewBox="0 0 10 10"
+                                        fill="none"
+                                      >
+                                        <circle
+                                          cx="5"
+                                          cy="5"
+                                          r="4.5"
+                                          stroke="#C04040"
+                                          strokeWidth="1"
+                                        />
+                                        <path
+                                          d="M5 3v2.5M5 7h.01"
+                                          stroke="#C04040"
+                                          strokeWidth="1.2"
+                                          strokeLinecap="round"
+                                        />
+                                      </svg>
+                                      {e}
+                                      {ei <
+                                        (row.serverErrors ?? []).length - 1 && (
+                                        <span
+                                          style={{
+                                            color: "#ecc",
+                                            marginLeft: 2,
+                                          }}
+                                        >
+                                          ·
+                                        </span>
+                                      )}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
 
                     {/* Import button */}
@@ -1351,21 +1364,8 @@ export default function ImportExportPage() {
               </div>
 
               {/* Right panel (dark) */}
-              <div
-                className="w-1/3 max-w-[300px]"
-                style={{
-                  flexShrink: 0,
-                  position: "sticky",
-                  top: 0,
-                  alignSelf: "flex-start",
-                  maxHeight: "calc(100vh - 160px)",
-                  display: "flex",
-                  flexDirection: "column",
-                  marginBottom: 32,
-                }}
-              >
+              <div className="ie-guide">
                 <div
-                  className="mb-20 lg:mb-9"
                   style={{
                     background: "#141414",
                     borderRadius: 12,
@@ -1556,18 +1556,10 @@ export default function ImportExportPage() {
 
           {/* ── EXPORT TAB ─────────────────────────────────────────── */}
           {tab === "export" && (
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                gap: 20,
-                alignItems: "flex-start",
-              }}
-            >
+            <div className="ie-export-body">
               {/* Left: format cards */}
-              <div className="flex w-full gap-8">
+              <div className="ie-export-left">
                 <div
-                  className="w-full"
                   style={{
                     background: "white",
                     borderRadius: 12,
@@ -1767,7 +1759,7 @@ export default function ImportExportPage() {
               </div>
 
               {/* Right: filter panel */}
-              <div className="max-w-[400px] w-1/2" style={{ flexShrink: 0 }}>
+              <div className="ie-export-right">
                 <div
                   style={{
                     background: "white",
