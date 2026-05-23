@@ -324,3 +324,164 @@ export async function remove(req: AuthRequest, res: Response, next: NextFunction
     next(err);
   }
 }
+
+export interface ImportRow {
+  date: string;
+  amount: string;
+  type: string;
+  category: string;
+  sub_category?: string;
+  note?: string;
+}
+
+export async function importTransactions(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const rows: ImportRow[] = req.body.rows;
+    if (!Array.isArray(rows) || rows.length === 0) {
+      res.status(400).json({ error: 'No rows provided' });
+      return;
+    }
+
+    // Load all categories + transaction types for this user upfront
+    const [allCategories, allSubCategories, transactionTypes] = await Promise.all([
+      prisma.category.findMany({
+        where: { OR: [{ userId: null }, { userId: req.userId }] },
+        include: { type: true },
+      }),
+      prisma.subCategory.findMany({
+        where: { OR: [{ userId: null }, { userId: req.userId }] },
+      }),
+      prisma.transactionType.findMany(),
+    ]);
+
+    const incomeType = transactionTypes.find(t => t.name === 'income');
+    const expenseType = transactionTypes.find(t => t.name === 'expense');
+
+    const results: { index: number; status: 'ok' | 'error'; errors: string[] }[] = [];
+    const toCreate: Parameters<typeof prisma.transaction.create>[0]['data'][] = [];
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const errors: string[] = [];
+
+      // Validate date
+      const dateVal = row.date?.trim();
+      if (!dateVal) errors.push('Date is required');
+      else if (isNaN(Date.parse(dateVal))) errors.push('Date must be YYYY-MM-DD');
+
+      // Validate amount
+      const amountVal = parseFloat(String(row.amount));
+      if (row.amount === undefined || row.amount === '') errors.push('Amount is required');
+      else if (isNaN(amountVal)) errors.push('Amount must be a number');
+
+      // Validate type
+      const typeStr = (row.type ?? '').trim().toLowerCase();
+      if (!typeStr) errors.push('Type is required (income or expense)');
+      else if (typeStr !== 'income' && typeStr !== 'expense' && typeStr !== 'inflow' && typeStr !== 'outflow')
+        errors.push('Type must be income/expense or inflow/outflow');
+
+      // Resolve transaction type
+      const isIncome = typeStr === 'income' || typeStr === 'inflow';
+      const resolvedType = isIncome ? incomeType : expenseType;
+      if (!resolvedType) errors.push('Transaction type not found');
+
+      // Validate category
+      const catName = (row.category ?? '').trim();
+      if (!catName) errors.push('Category is required');
+      const matchedCat = allCategories.find(
+        c => c.name.toLowerCase() === catName.toLowerCase() && c.typeId === resolvedType?.id
+      );
+      if (catName && !matchedCat) errors.push(`Category "${catName}" not found for type "${typeStr}"`);
+
+      // Resolve sub-category (optional)
+      const subName = (row.sub_category ?? '').trim();
+      let matchedSub = undefined;
+      if (subName && matchedCat) {
+        matchedSub = allSubCategories.find(
+          s => s.name.toLowerCase() === subName.toLowerCase() && s.categoryId === matchedCat.id
+        );
+        if (!matchedSub) errors.push(`Sub-category "${subName}" not found under "${catName}"`);
+      }
+
+      if (errors.length > 0) {
+        results.push({ index: i, status: 'error', errors });
+        continue;
+      }
+
+      results.push({ index: i, status: 'ok', errors: [] });
+      toCreate.push({
+        amount: Math.abs(amountVal),
+        typeId: resolvedType!.id,
+        categoryId: matchedCat!.id,
+        subCategoryId: matchedSub?.id ?? undefined,
+        date: new Date(dateVal).toISOString(),
+        note: row.note?.trim() || undefined,
+        userId: req.userId!,
+      });
+    }
+
+    // Bulk create valid rows
+    const created = await Promise.all(
+      toCreate.map(data => prisma.transaction.create({ data: data as any }))
+    );
+
+    res.json({
+      data: {
+        imported: created.length,
+        errors: results.filter(r => r.status === 'error').length,
+        results,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function exportTransactions(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { format = 'csv', from, to, eventId } = req.query;
+
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        userId: req.userId,
+        ...(eventId ? { eventId: String(eventId) } : {}),
+        ...(from || to
+          ? {
+              date: {
+                ...(from ? { gte: new Date(String(from)) } : {}),
+                ...(to ? { lte: new Date(String(to)) } : {}),
+              },
+            }
+          : {}),
+      },
+      include: { type: true, category: true, subCategory: true, event: true },
+      orderBy: { date: 'desc' },
+    });
+
+    if (format === 'json') {
+      res.setHeader('Content-Disposition', 'attachment; filename="budget_export.json"');
+      res.setHeader('Content-Type', 'application/json');
+      res.json({ data: transactions });
+      return;
+    }
+
+    // Default: CSV
+    const headers = ['date', 'amount', 'type', 'category', 'sub_category', 'note', 'event'];
+    const rows = transactions.map(t => [
+      new Date(t.date).toISOString().split('T')[0],
+      t.amount,
+      t.type.name,
+      t.category.name,
+      t.subCategory?.name ?? '',
+      t.note ?? '',
+      t.event?.name ?? '',
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+
+    res.setHeader('Content-Disposition', 'attachment; filename="budget_export.csv"');
+    res.setHeader('Content-Type', 'text/csv');
+    res.send(csv);
+  } catch (err) {
+    next(err);
+  }
+}

@@ -73,6 +73,27 @@ export interface AnalyticsData {
   eventSummary: AnalyticsEventSummary;
 }
 
+export interface ImportRowPayload {
+  date: string;
+  amount: string;
+  type: string;
+  category: string;
+  sub_category?: string;
+  note?: string;
+}
+
+export interface ImportRowResult {
+  index: number;
+  status: 'ok' | 'error';
+  errors: string[];
+}
+
+export interface ImportResult {
+  imported: number;
+  errors: number;
+  results: ImportRowResult[];
+}
+
 export const transactionService = {
   getAll: (params?: Record<string, string>) => api.get<{ data: Transaction[] }>('/transactions', { params }),
   getSummary: (params?: Record<string, string>) => api.get<{ data: { totalIncome: number; totalExpense: number; balance: number } }>('/transactions/summary', { params }),
@@ -81,4 +102,14 @@ export const transactionService = {
   update: (id: string, data: Partial<TransactionPayload>) => api.put<{ data: Transaction }>(`/transactions/${id}`, data),
   remove: (id: string) => api.delete(`/transactions/${id}`),
   patchEvent: (id: string, eventId: string | null) => api.patch<{ data: Transaction }>(`/transactions/${id}/event`, { eventId }),
+  importRows: (rows: ImportRowPayload[]) => api.post<{ data: ImportResult }>('/transactions/import', { rows }),
+  exportUrl: (format: 'csv' | 'json' = 'csv', params?: { from?: string; to?: string; eventId?: string }) => {
+    const baseUrl = import.meta.env.VITE_API_URL ?? '/api';
+    const token = localStorage.getItem('token') ?? '';
+    const query = new URLSearchParams({ format });
+    if (params?.from) query.set('from', params.from);
+    if (params?.to) query.set('to', params.to);
+    if (params?.eventId) query.set('eventId', params.eventId);
+    return { url: `${baseUrl}/transactions/export?${query}`, token };
+  },
 };
