@@ -199,7 +199,7 @@ export function startTelegramBot(): void {
   bot.onText(/^\/start$/, async (msg) => {
     await bot!.sendMessage(
       msg.chat.id,
-      "👋 Welcome to Budget Bot!\n\nUse /login to connect your budget account, then send me any transaction message.\n\nCommands:\n/login — sign in with email & password\n/logout — unlink your account\n/categories — show your categories\n/summary — this month's balance",
+      "👋 Welcome to Budget Bot!\n\nUse /login to connect your budget account, then send me any transaction message.\n\nCommands:\n/login — sign in with email & password\n/logout — unlink your account\n/categories — show your categories\n/summary — this month's balance\n/today — all transactions recorded today\n/undo — delete the last transaction",
     );
   });
 
@@ -303,6 +303,167 @@ export function startTelegramBot(): void {
         `${balanceEmoji} Balance: ${formatIDR(balance)}`,
       { parse_mode: "Markdown" },
     );
+  });
+
+  bot.onText(/^\/today$/, async (msg) => {
+    const chatId = msg.chat.id;
+    const user = await prisma.user.findUnique({
+      where: { telegramChatId: String(chatId) },
+    });
+    if (!user) {
+      await bot!.sendMessage(chatId, "⚠️ Use /login first.");
+      return;
+    }
+
+    const now = new Date();
+    const from = new Date(
+      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0),
+    );
+    const to = new Date(
+      Date.UTC(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        23,
+        59,
+        59,
+        999,
+      ),
+    );
+
+    const transactions = await prisma.transaction.findMany({
+      where: { userId: user.id, date: { gte: from, lte: to } },
+      include: { type: true, category: true, subCategory: true },
+      orderBy: { date: "asc" },
+    });
+
+    if (transactions.length === 0) {
+      await bot!.sendMessage(chatId, "📭 No transactions recorded today.");
+      return;
+    }
+
+    let totalIncome = 0;
+    let totalExpense = 0;
+    const lines = transactions.map((tx) => {
+      const isIncome = tx.type.name === "income";
+      if (isIncome) totalIncome += tx.amount;
+      else totalExpense += tx.amount;
+      const emoji = isIncome ? "💰" : "💸";
+      const sign = isIncome ? "+" : "-";
+      const sub = tx.subCategory ? ` › ${tx.subCategory.name}` : "";
+      return `${emoji} ${tx.note ?? tx.category.name} (${tx.category.name}${sub})\n   ${sign}${formatIDR(tx.amount)}`;
+    });
+
+    const balance = totalIncome - totalExpense;
+    const balanceEmoji = balance >= 0 ? "✅" : "⚠️";
+    const dateLabel = getTodayDate();
+
+    await bot!.sendMessage(
+      chatId,
+      `📅 *Today's transactions (${dateLabel})*\n\n` +
+        lines.join("\n\n") +
+        `\n\n─────────────────\n` +
+        `💰 Income: ${formatIDR(totalIncome)}\n` +
+        `💸 Expense: ${formatIDR(totalExpense)}\n` +
+        `${balanceEmoji} Balance: ${formatIDR(balance)}`,
+      { parse_mode: "Markdown" },
+    );
+  });
+
+  bot.onText(/^\/undo$/, async (msg) => {
+    const chatId = msg.chat.id;
+    const user = await prisma.user.findUnique({
+      where: { telegramChatId: String(chatId) },
+    });
+    if (!user) {
+      await bot!.sendMessage(chatId, "⚠️ Use /login first.");
+      return;
+    }
+
+    const last = await prisma.transaction.findFirst({
+      where: { userId: user.id },
+      include: { type: true, category: true, subCategory: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!last) {
+      await bot!.sendMessage(chatId, "📭 No transactions to undo.");
+      return;
+    }
+
+    const isIncome = last.type.name === "income";
+    const emoji = isIncome ? "💰" : "💸";
+    const sign = isIncome ? "+" : "-";
+    const sub = last.subCategory ? ` › ${last.subCategory.name}` : "";
+    const dateStr = last.date.toISOString().slice(0, 10);
+
+    await bot!.sendMessage(
+      chatId,
+      `🗑️ *Delete last transaction?*\n\n` +
+        `${emoji} ${last.note ?? last.category.name}\n` +
+        `🏷️ ${last.category.name}${sub}\n` +
+        `💵 ${sign}${formatIDR(last.amount)}\n` +
+        `📅 ${dateStr}\n\n` +
+        `This cannot be undone.`,
+      {
+        parse_mode: "Markdown",
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "✅ Yes, delete it", callback_data: `undo_confirm:${last.id}` },
+              { text: "❌ Cancel", callback_data: "undo_cancel" },
+            ],
+          ],
+        },
+      },
+    );
+  });
+
+  bot.on("callback_query", async (query) => {
+    if (!query.data || !query.message) return;
+    const chatId = query.message.chat.id;
+
+    if (query.data === "undo_cancel") {
+      await bot!.editMessageText("↩️ Cancelled — no changes made.", {
+        chat_id: chatId,
+        message_id: query.message.message_id,
+      });
+      await bot!.answerCallbackQuery(query.id);
+      return;
+    }
+
+    if (query.data.startsWith("undo_confirm:")) {
+      const txId = query.data.slice("undo_confirm:".length);
+      const user = await prisma.user.findUnique({
+        where: { telegramChatId: String(chatId) },
+      });
+
+      if (!user) {
+        await bot!.answerCallbackQuery(query.id, { text: "⚠️ Not logged in." });
+        return;
+      }
+
+      const tx = await prisma.transaction.findFirst({
+        where: { id: txId, userId: user.id },
+      });
+
+      if (!tx) {
+        await bot!.editMessageText("⚠️ Transaction not found — it may have already been deleted.", {
+          chat_id: chatId,
+          message_id: query.message.message_id,
+        });
+        await bot!.answerCallbackQuery(query.id);
+        return;
+      }
+
+      await prisma.transaction.delete({ where: { id: txId } });
+
+      await bot!.editMessageText("✅ Last transaction deleted.", {
+        chat_id: chatId,
+        message_id: query.message.message_id,
+      });
+      await bot!.answerCallbackQuery(query.id);
+    }
   });
 
   // All non-command messages: check login flow first, then treat as transaction
