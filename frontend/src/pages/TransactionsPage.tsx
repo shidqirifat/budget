@@ -218,7 +218,9 @@ export default function TransactionsPage() {
               <IconChevronDown
                 size={12}
                 style={{
-                  transform: summaryExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                  transform: summaryExpanded
+                    ? "rotate(180deg)"
+                    : "rotate(0deg)",
                   transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1)",
                 }}
               />
