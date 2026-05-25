@@ -47,7 +47,7 @@ export default function ImportExportPage() {
   } = useExport();
 
   return (
-    <div className="h-full flex flex-col bg-bg-primary overflow-hidden">
+    <div className="h-full flex flex-col bg-bg-primary overflow-hidden max-md:h-auto max-md:overflow-visible">
       {/* Header */}
       <div className="px-8 pt-7 pb-0 shrink-0 max-md:px-4 max-md:pt-5">
         <h1 className="text-[22px] font-bold text-text-primary m-0 tracking-tight">

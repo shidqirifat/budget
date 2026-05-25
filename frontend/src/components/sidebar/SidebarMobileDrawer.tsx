@@ -31,7 +31,7 @@ export default function SidebarMobileDrawer({
 
       {/* Drawer */}
       <div
-        className="bg-dark flex flex-col fixed left-0 top-0 h-screen z-[201] transition-transform duration-[250ms] ease-in-out"
+        className="bg-dark flex flex-col fixed left-0 top-0 z-[201] transition-transform duration-[250ms] ease-in-out [height:100dvh]"
         style={{
           width: SIDEBAR_FULL,
           transform: drawerVisible
@@ -41,7 +41,9 @@ export default function SidebarMobileDrawer({
       >
         <SidebarLogoButton showText onClick={onLogoClick} />
         <SidebarNavItems labels onClick={onClose} />
-        <SidebarUserSection showText user={user} onLogout={onLogout} />
+        <div className="mt-auto">
+          <SidebarUserSection showText user={user} onLogout={onLogout} />
+        </div>
       </div>
     </>
   );

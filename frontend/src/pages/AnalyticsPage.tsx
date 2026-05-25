@@ -43,7 +43,7 @@ export default function AnalyticsPage() {
   const chartLast = data?.monthly.find((m) => m.month === month);
 
   return (
-    <div className="h-screen flex flex-col bg-bg-primary overflow-hidden">
+    <div className="h-screen flex flex-col bg-bg-primary overflow-hidden max-md:h-auto max-md:overflow-visible">
       {/* Header */}
       <div className="px-4 sm:px-6 lg:px-8 pt-5 lg:pt-7 pb-0 flex items-center justify-between shrink-0 gap-3">
         <div className="min-w-0">
