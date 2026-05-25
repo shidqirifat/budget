@@ -40,9 +40,9 @@ export default function MonthNav({ month, setMonth, minMonth, maxMonth = current
   );
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'white', border: '1px solid #E5E5E0', borderRadius: 8, padding: '6px 10px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'white', border: '1px solid #E5E5E0', borderRadius: 8, padding: '6px 10px' }} className="w-full lg:w-auto">
       {btn(canPrev, '‹', () => setMonth(addMonths(month, -1)))}
-      <span style={{ fontSize: 13, fontWeight: 600, color: '#333', minWidth: 110, textAlign: 'center' }}>
+      <span style={{ fontSize: 13, fontWeight: 600, color: '#333', textAlign: 'center' }} className="flex-1 lg:min-w-[110px] lg:flex-none">
         {monthLabel(month)}
       </span>
       {btn(canNext, '›', () => setMonth(addMonths(month, 1)))}

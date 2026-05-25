@@ -100,7 +100,7 @@ export default function ExportFormatCards({
           </button>
         </div>
       ) : (
-        <div className="text-xs text-[#ccc] bg-[#F8F8F5] rounded-lg px-4 py-3">
+        <div className="text-xs text-text-muted bg-[#F8F8F5] rounded-lg px-4 py-3">
           No filters — exports all your transactions across all months.
         </div>
       )}

@@ -32,6 +32,14 @@ export default {
         "surface-lime": "var(--color-surface-lime)",
         // Dark surface
         dark: "var(--color-dark)",
+        // Dark surface text
+        "text-dark-subtle": "var(--color-text-dark-subtle)",
+        "text-dark-muted": "var(--color-text-dark-muted)",
+        // Dark sidebar internals
+        "dark-surface": "var(--color-dark-surface)",
+        "dark-avatar": "var(--color-dark-avatar)",
+        "dark-icon": "var(--color-dark-icon)",
+        "dark-label": "var(--color-dark-label)",
       },
     },
   },

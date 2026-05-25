@@ -51,7 +51,7 @@ export default function ImportGuidePanel({
             {step.n}
           </div>
           <div>
-            <div className="text-xs font-bold text-[#ccc] mb-1">{step.title}</div>
+            <div className="text-xs font-bold text-text-dark-subtle mb-1">{step.title}</div>
             <div className="text-[11px] text-text-secondary leading-relaxed">
               {step.body}
             </div>
@@ -61,7 +61,7 @@ export default function ImportGuidePanel({
 
       {expenseCategories.length > 0 && (
         <>
-          <div className="text-[10px] font-semibold text-[#777] tracking-[0.07em] uppercase mb-2.5 mt-5">
+          <div className="text-[10px] font-semibold text-text-dark-muted tracking-[0.07em] uppercase mb-2.5 mt-5">
             Expense Categories
           </div>
           <div className="flex flex-wrap gap-1.5 mb-3.5">
@@ -79,7 +79,7 @@ export default function ImportGuidePanel({
 
       {incomeCategories.length > 0 && (
         <>
-          <div className="text-[10px] font-semibold text-[#777] tracking-[0.07em] uppercase mb-2.5">
+          <div className="text-[10px] font-semibold text-text-dark-muted tracking-[0.07em] uppercase mb-2.5">
             Income Categories
           </div>
           <div className="flex flex-wrap gap-1.5">

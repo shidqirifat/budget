@@ -33,6 +33,16 @@
 
   /* Dark surface */
   --color-dark: #141414;
+
+  /* Dark surface text */
+  --color-text-dark-subtle: #cccccc;
+  --color-text-dark-muted: #777777;
+
+  /* Dark sidebar internals */
+  --color-dark-surface: #1e1e1e;
+  --color-dark-avatar: #252525;
+  --color-dark-icon: #555555;
+  --color-dark-label: #999999;
 }
 
 *,

@@ -59,7 +59,7 @@ export default function ImportExportPage() {
       </div>
 
       {/* Tab bar */}
-      <div className="px-8 pt-[18px] pb-0 shrink-0 max-md:px-4 max-md:pt-3.5">
+      <div className="px-8 pt-[18px] pb-3 shrink-0 max-md:px-4 max-md:pt-3.5">
         <div className="flex bg-surface-card border border-border-default rounded-[10px] p-1 w-fit">
           {(["import", "export"] as const).map((t) => {
             const active = tab === t;
@@ -82,7 +82,7 @@ export default function ImportExportPage() {
       </div>
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto px-8 pt-5 pb-8 max-md:px-4 max-md:pt-3 max-md:pb-6">
+      <div className="flex-1 overflow-y-auto px-8 pb-8 max-md:px-4 max-md:pb-6">
         {/* ── IMPORT TAB ───────────────────────────────────────── */}
         {tab === "import" && (
           <div className="flex gap-5 flex-row max-md:flex-col">

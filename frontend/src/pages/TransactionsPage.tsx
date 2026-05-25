@@ -71,7 +71,7 @@ export default function TransactionsPage() {
       >
         {/* Title row */}
         <div className="contents max-md:flex max-md:items-center max-md:justify-between max-md:w-full">
-          <div className="max-sm:hidden">
+          <div className="max-sm:hidden mr-6">
             <h1 className="text-[22px] font-bold text-text-primary m-0 tracking-tight">
               Transactions
             </h1>
@@ -80,7 +80,7 @@ export default function TransactionsPage() {
             </p>
           </div>
           {/* MonthNav — mobile */}
-          <div className="hidden max-md:flex">
+          <div className="hidden max-md:flex w-full md:w-auto">
             <MonthNav month={month} setMonth={setMonth} />
           </div>
         </div>
@@ -93,7 +93,7 @@ export default function TransactionsPage() {
           </div>
 
           {/* Search */}
-          <div className="flex items-center gap-2 bg-bg-white border border-border-input rounded-lg px-3.5 py-[9px] w-[210px] max-md:w-full max-md:flex-1 max-md:min-w-0">
+          <div className="h-9 flex items-center gap-2 bg-bg-white border border-border-input rounded-lg px-3.5 py-[9px] w-[210px] max-md:w-full max-md:flex-1 max-md:min-w-0">
             <IconSearch className="shrink-0" />
             <input
               value={filter.search}
@@ -116,7 +116,7 @@ export default function TransactionsPage() {
           <button
             type="button"
             onClick={() => setShowFilters((f) => !f)}
-            className={`flex items-center gap-1.5 px-3.5 py-[9px] rounded-lg text-[13px] cursor-pointer shrink-0 transition-colors
+            className={`flex items-center gap-1.5 px-3.5 py-[9px] rounded-lg text-[13px] cursor-pointer shrink-0 transition-colors h-9
               ${
                 filterOptions.hasFilter
                   ? "bg-text-primary text-bg-lime border-none font-bold"
@@ -124,7 +124,7 @@ export default function TransactionsPage() {
               }`}
           >
             <IconFilter />
-            Filter
+            <span className="max-md:hidden">Filter</span>
             {filterOptions.activeFilterCount > 0 && (
               <span className="bg-bg-lime text-text-primary rounded-full w-4 h-4 text-[9px] font-extrabold flex items-center justify-center">
                 {filterOptions.activeFilterCount}
@@ -148,7 +148,7 @@ export default function TransactionsPage() {
       </CollapsePanel>
 
       {/* Summary bar */}
-      <div className="px-8 pt-3.5 pb-0 shrink-0 max-md:px-4 max-md:pt-3">
+      <div className="px-8 shrink-0 max-md:px-4 py-3">
         {/* Desktop */}
         <div className="hidden md:flex bg-bg-white rounded-xl px-8 py-[18px] items-center border border-border-default shadow-[0_1px_4px_rgba(0,0,0,0.05)]">
           {[
@@ -263,7 +263,7 @@ export default function TransactionsPage() {
       </div>
 
       {/* Transaction list */}
-      <div className="flex-1 overflow-y-auto px-8 pt-3.5 pb-20 max-md:px-4 max-md:pt-3">
+      <div className="flex-1 overflow-y-auto px-8 pb-20 max-md:px-4">
         <TransactionList
           groups={groups}
           loading={loading}
