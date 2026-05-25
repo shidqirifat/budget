@@ -13,16 +13,9 @@ interface InsightRow {
   truncate?: boolean;
 }
 
-function InsightCard({
-  icon,
-  label,
-  value,
-  sub,
-  accentClass,
-  truncate,
-}: InsightRow) {
+function InsightCard({ icon, label, value, sub, accentClass, truncate }: InsightRow) {
   return (
-    <div className="p-[10px_14px] bg-[#FAFAFA] rounded-[10px] border border-border-default">
+    <div className="p-[10px_14px] bg-[#FAFAFA] rounded-[10px] border border-border-default min-w-0">
       <div className="text-[10px] text-text-muted font-semibold tracking-[0.07em] mb-1">
         {icon} {label}
       </div>
@@ -45,10 +38,7 @@ interface InsightCardsProps {
   eventSummary: AnalyticsEventSummary | null | undefined;
 }
 
-export default function InsightCards({
-  insights,
-  eventSummary,
-}: InsightCardsProps) {
+export default function InsightCards({ insights, eventSummary }: InsightCardsProps) {
   const rows: InsightRow[] = [];
 
   if (insights.mostExpenseCategory)
@@ -86,7 +76,7 @@ export default function InsightCards({
   return (
     <div className="flex flex-col gap-2">
       {rows.length > 0 && (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {rows.map((r, i) => (
             <InsightCard key={i} {...r} />
           ))}
@@ -94,7 +84,7 @@ export default function InsightCards({
       )}
 
       {eventSummary && (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <InsightCard
             icon="📅"
             label="RUNNING EVENTS"

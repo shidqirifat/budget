@@ -44,24 +44,29 @@ export default function AnalyticsPage() {
 
   return (
     <div className="h-screen flex flex-col bg-bg-primary overflow-hidden">
-      <div className="px-8 pt-7 pb-0 flex items-center justify-between shrink-0">
-        <div>
-          <h1 className="text-[22px] font-bold text-text-primary m-0 tracking-[-0.02em]">
+      {/* Header */}
+      <div className="px-4 sm:px-6 lg:px-8 pt-5 lg:pt-7 pb-0 flex items-center justify-between shrink-0 gap-3">
+        <div className="min-w-0">
+          <h1 className="text-[18px] sm:text-[22px] font-bold text-text-primary m-0 tracking-[-0.02em] truncate">
             Analytics
           </h1>
-          <p className="text-[13px] text-text-secondary mt-[3px] mb-0">
+          <p className="text-[12px] sm:text-[13px] text-text-secondary mt-[3px] mb-0 truncate">
             {monthLabel(month)}
             {prev ? ` · vs ${monthShort(prev.month)}` : ""}
           </p>
         </div>
-        <MonthNav month={month} setMonth={setMonth} />
+        <div className="shrink-0">
+          <MonthNav month={month} setMonth={setMonth} />
+        </div>
       </div>
 
-      <div className="flex px-8 pt-[18px] gap-1.5 shrink-0">
+      {/* Tab bar */}
+      <div className="flex px-4 sm:px-6 lg:px-8 pt-4 lg:pt-[18px] pb-4 shrink-0">
         <TabBar tabs={TABS} active={activeTab} onChange={setActiveTab} />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-8 pt-[18px] pb-10">
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-0 lg:pt-[18px] pb-10">
         {loading && (
           <div className="flex items-center justify-center h-[200px] text-text-muted text-[14px]">
             Loading...
@@ -88,8 +93,9 @@ export default function AnalyticsPage() {
               prev={prev}
             />
 
-            <div className="bg-bg-white rounded-xl px-7 py-[22px] border border-border-default mb-[18px]">
-              <div className="mb-5">
+            {/* Cash flow card */}
+            <div className="bg-bg-white rounded-xl px-4 sm:px-7 py-5 sm:py-[22px] border border-border-default mb-3 sm:mb-4 lg:mb-[18px]">
+              <div className="mb-4 sm:mb-5">
                 <div className="text-[15px] font-bold text-text-primary">
                   Monthly Cash Flow
                 </div>
@@ -100,9 +106,10 @@ export default function AnalyticsPage() {
                 </div>
               </div>
 
-              <div className="flex gap-7 items-start">
-                <div className="w-1/2">
-                  <div className="overflow-x-auto min-w-0">
+              {/* Bar chart + insights: side-by-side on lg, stacked below */}
+              <div className="flex flex-col lg:flex-row lg:gap-7 lg:items-start gap-5">
+                <div className="min-w-0 lg:w-1/2">
+                  <div className="overflow-x-auto">
                     {data && (
                       <AnalyticsBarChart
                         months={data.monthly}
@@ -131,7 +138,7 @@ export default function AnalyticsPage() {
                 </div>
 
                 {data?.insights && (
-                  <div className="flex-[0_0_47%] min-w-0 flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 lg:flex-[0_0_47%] lg:min-w-0">
                     <InsightCards
                       insights={data.insights}
                       eventSummary={data.eventSummary}
@@ -150,7 +157,8 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            <div className="flex gap-3.5">
+            {/* Category breakdown tables: side-by-side on lg, stacked below */}
+            <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 lg:gap-3.5">
               {cats.length > 0 && (
                 <CategoryBreakdownTable
                   type="expense"
@@ -174,8 +182,9 @@ export default function AnalyticsPage() {
         )}
 
         {!loading && !error && activeTab === "categories" && (
-          <div className="flex flex-col gap-6">
-            <div className="flex gap-5">
+          <div className="flex flex-col gap-5 lg:gap-6">
+            {/* Expense section */}
+            <div className="flex flex-col gap-2 md:flex-row md:gap-5">
               <CategoryDonutPanel
                 type="expense"
                 month={month}
@@ -190,8 +199,9 @@ export default function AnalyticsPage() {
               />
             </div>
 
+            {/* Income section */}
             {incCats.length > 0 && (
-              <div className="flex gap-5">
+              <div className="flex flex-col gap-2 md:flex-row md:gap-5">
                 <CategoryDonutPanel
                   type="income"
                   month={month}
