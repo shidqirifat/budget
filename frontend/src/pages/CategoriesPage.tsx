@@ -27,7 +27,7 @@ export default function CategoriesPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-bg-primary overflow-hidden">
+    <div className="h-screen flex flex-col bg-bg-primary overflow-hidden max-md:h-auto max-md:overflow-visible">
       {/* Error banner */}
       {anyError && (
         <div className="px-8 py-2 bg-surface-error border-b border-border-default flex justify-between items-center shrink-0">
@@ -69,7 +69,7 @@ export default function CategoriesPage() {
       </div>
 
       {/* Two-panel layout */}
-      <div className="flex flex-1 px-4 sm:px-8 pb-8 gap-5 overflow-hidden">
+      <div className="flex flex-1 px-4 sm:px-8 pb-8 gap-5 overflow-hidden max-md:flex-none max-md:overflow-visible">
         {/* Left list panel */}
         <div
           className={[

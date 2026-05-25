@@ -66,7 +66,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-0 lg:pt-[18px] pb-10">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-0 lg:pt-[18px] pb-10 max-md:flex-none max-md:overflow-visible">
         {loading && (
           <div className="flex items-center justify-center h-[200px] text-text-muted text-[14px]">
             Loading...

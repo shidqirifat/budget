@@ -82,7 +82,7 @@ export default function ImportExportPage() {
       </div>
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto px-8 pb-8 max-md:px-4 max-md:pb-6">
+      <div className="flex-1 overflow-y-auto px-8 pb-8 max-md:px-4 max-md:pb-6 max-md:flex-none max-md:overflow-visible">
         {/* ── IMPORT TAB ───────────────────────────────────────── */}
         {tab === "import" && (
           <div className="flex gap-5 flex-row max-md:flex-col">

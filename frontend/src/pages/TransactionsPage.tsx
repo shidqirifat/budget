@@ -61,7 +61,7 @@ export default function TransactionsPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-bg-primary overflow-hidden">
+    <div className="h-screen flex flex-col bg-bg-primary overflow-hidden max-md:h-auto max-md:overflow-visible">
       {/* Header */}
       <div
         className="
@@ -263,7 +263,7 @@ export default function TransactionsPage() {
       </div>
 
       {/* Transaction list */}
-      <div className="flex-1 overflow-y-auto px-8 pb-20 max-md:px-4">
+      <div className="flex-1 overflow-y-auto px-8 pb-20 max-md:px-4 max-md:flex-none max-md:overflow-visible">
         <TransactionList
           groups={groups}
           loading={loading}
