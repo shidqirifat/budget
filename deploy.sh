@@ -19,16 +19,6 @@ log "=== Deploy started ==="
 log "Fetching remote..."
 git fetch origin
 
-LOCAL=$(git rev-parse HEAD)
-REMOTE=$(git rev-parse '@{u}')
-
-if [[ "$LOCAL" == "$REMOTE" ]]; then
-  log "Already up to date. Nothing to deploy."
-  exit 0
-fi
-
-log "New commits found ($(git log --oneline "$LOCAL".."$REMOTE" | wc -l | tr -d ' ') commit(s))"
-
 # ── 2. Pull ───────────────────────────────────────────────────────────────────
 log "Pulling latest..."
 git pull || fail "git pull failed"
