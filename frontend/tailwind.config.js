@@ -10,12 +10,22 @@ export default {
         sans: ['Space Grotesk', 'sans-serif'],
       },
       colors: {
-        lime: { DEFAULT: '#D1FF19' },
-        dark: { DEFAULT: '#141414' },
-        green: { tx: '#2A9D5C' },
-        red: { tx: '#E05C5C' },
-        bg: { DEFAULT: '#F5F5F2' },
-        border: { DEFAULT: '#EEEEE8' },
+        // Backgrounds
+        'bg-primary': 'var(--color-bg-primary)',
+        'bg-white': 'var(--color-bg-white)',
+        'bg-lime': 'var(--color-bg-lime)',
+        // Text
+        'text-primary': 'var(--color-text-primary)',
+        'text-secondary': 'var(--color-text-secondary)',
+        'text-muted': 'var(--color-text-muted)',
+        'text-income': 'var(--color-text-income)',
+        'text-expense': 'var(--color-text-expense)',
+        // Border
+        'border-default': 'var(--color-border-default)',
+        'border-input': 'var(--color-border-input)',
+        // Surface
+        'surface-card': 'var(--color-surface-card)',
+        'surface-error': 'var(--color-surface-error)',
       },
     },
   },

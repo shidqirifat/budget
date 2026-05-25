@@ -1,212 +1,77 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
-import { authService } from "@/services/auth.service";
+import { Link } from "react-router-dom";
+import { useLoginForm } from "@/hooks/useLoginForm";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
 
 export default function LoginPage() {
-  const navigate = useNavigate();
-  const { login } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      const res = await authService.login({ email, password });
-      login(res.data.data.token, res.data.data.user);
-      navigate("/");
-    } catch {
-      setError("Invalid email or password");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    error,
+    loading,
+    handleSubmit,
+  } = useLoginForm();
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "#F5F5F2",
-        padding: "24px 16px",
-      }}
-    >
-      <div style={{ width: "100%", maxWidth: 400 }}>
-        {/* Logo */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            marginBottom: 40,
-          }}
-        >
+    <div className="min-h-screen flex items-center justify-center bg-bg-primary px-4 py-6">
+      <div className="w-full max-w-[400px]">
+        <div className="flex items-center gap-3 mb-10">
           <img
             src="/logo.png"
             alt="Budget"
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 10,
-              objectFit: "cover",
-            }}
+            className="w-10 h-10 rounded-[10px] object-cover"
           />
-          <span
-            style={{
-              fontWeight: 700,
-              fontSize: 20,
-              color: "#111",
-              letterSpacing: "-0.02em",
-            }}
-          >
+          <span className="text-xl font-bold text-text-primary tracking-tight">
             Budget
           </span>
         </div>
 
-        <div
-          style={{
-            background: "white",
-            borderRadius: 16,
-            padding: 36,
-            border: "1px solid #EEEEE8",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
-          }}
-        >
-          <h1
-            style={{
-              fontSize: 22,
-              fontWeight: 700,
-              color: "#111",
-              margin: "0 0 6px",
-              letterSpacing: "-0.02em",
-            }}
-          >
+        <div className="bg-surface-card rounded-2xl p-9 border border-border-default shadow-sm">
+          <h1 className="text-[22px] font-bold text-text-primary tracking-tight mb-1.5">
             Welcome back
           </h1>
-          <p style={{ fontSize: 13, color: "#999", margin: "0 0 28px" }}>
+          <p className="text-[13px] text-text-secondary mb-7">
             Sign in to your account
           </p>
 
-          <form
-            onSubmit={handleSubmit}
-            style={{ display: "flex", flexDirection: "column", gap: 16 }}
-          >
-            <div>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: "#aaa",
-                  letterSpacing: "0.07em",
-                  marginBottom: 8,
-                }}
-              >
-                EMAIL
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="you@example.com"
-                style={{
-                  width: "100%",
-                  padding: "11px 14px",
-                  borderRadius: 8,
-                  border: "1px solid #E5E5E0",
-                  fontSize: 14,
-                  color: "#333",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
-            <div>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: "#aaa",
-                  letterSpacing: "0.07em",
-                  marginBottom: 8,
-                }}
-              >
-                PASSWORD
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="••••••••"
-                style={{
-                  width: "100%",
-                  padding: "11px 14px",
-                  borderRadius: 8,
-                  border: "1px solid #E5E5E0",
-                  fontSize: 14,
-                  color: "#333",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <Input
+              id="email"
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="you@example.com"
+            />
+            <Input
+              id="password"
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+            />
 
             {error && (
-              <div
-                style={{
-                  fontSize: 13,
-                  color: "#E05C5C",
-                  padding: "10px 14px",
-                  background: "#FDF8F8",
-                  borderRadius: 8,
-                  border: "1px solid #FDEAEA",
-                }}
-              >
+              <div className="text-[13px] text-text-expense px-3.5 py-2.5 bg-surface-error rounded-lg border border-border-default">
                 {error}
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                padding: "12px",
-                borderRadius: 8,
-                border: "none",
-                background: "#D1FF19",
-                color: "#111",
-                fontSize: 14,
-                fontWeight: 700,
-                cursor: loading ? "not-allowed" : "pointer",
-                marginTop: 4,
-                opacity: loading ? 0.7 : 1,
-              }}
-            >
+            <Button type="submit" loading={loading} className="mt-1">
               {loading ? "Signing in…" : "Sign In"}
-            </button>
+            </Button>
           </form>
 
-          <p
-            style={{
-              textAlign: "center",
-              fontSize: 13,
-              color: "#999",
-              marginTop: 24,
-            }}
-          >
+          <p className="text-center text-[13px] text-text-secondary mt-6">
             Don't have an account?{" "}
             <Link
               to="/register"
-              style={{ color: "#111", fontWeight: 600, textDecoration: "none" }}
+              className="text-text-primary font-semibold no-underline"
             >
               Register
             </Link>

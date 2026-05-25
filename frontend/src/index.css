@@ -4,6 +4,28 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Backgrounds */
+  --color-bg-primary: #F5F5F2;
+  --color-bg-white: #ffffff;
+  --color-bg-lime: #D1FF19;
+
+  /* Text */
+  --color-text-primary: #141414;
+  --color-text-secondary: #999999;
+  --color-text-muted: #aaaaaa;
+  --color-text-income: #2A9D5C;
+  --color-text-expense: #E05C5C;
+
+  /* Border */
+  --color-border-default: #EEEEE8;
+  --color-border-input: #E5E5E0;
+
+  /* Surface */
+  --color-surface-card: #ffffff;
+  --color-surface-error: #FDF8F8;
+}
+
 *, *::before, *::after { box-sizing: border-box; }
 
 html, body, #root {
