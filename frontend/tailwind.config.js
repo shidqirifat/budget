@@ -30,6 +30,8 @@ export default {
         "accent-amber": "var(--color-accent-amber)",
         // Surface extended
         "surface-lime": "var(--color-surface-lime)",
+        // Dark surface
+        dark: "var(--color-dark)",
       },
     },
   },

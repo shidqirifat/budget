@@ -30,6 +30,9 @@
 
   /* Surface extended */
   --color-surface-lime: #fafde8;
+
+  /* Dark surface */
+  --color-dark: #141414;
 }
 
 *,
