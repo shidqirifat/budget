@@ -8,6 +8,11 @@ import {
 import { categoryService } from "@/services/category.service";
 import { eventService, BudgetEvent } from "@/services/event.service";
 import { formatCurrency } from "@/utils/format";
+import IconFileCheck from "@/assets/icons/IconFileCheck";
+import IconDownload from "@/assets/icons/IconDownload";
+import IconUpload from "@/assets/icons/IconUpload";
+import IconAlertCircle from "@/assets/icons/IconAlertCircle";
+import IconCheckCircle from "@/assets/icons/IconCheckCircle";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -508,42 +513,7 @@ export default function ImportExportPage() {
                           flexShrink: 0,
                         }}
                       >
-                        <svg
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                        >
-                          <rect
-                            x="4"
-                            y="2"
-                            width="12"
-                            height="16"
-                            rx="2"
-                            stroke="#D1FF19"
-                            strokeWidth="1.5"
-                            fill="none"
-                          />
-                          <path
-                            d="M12 2v5h4"
-                            stroke="#D1FF19"
-                            strokeWidth="1.5"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M7 13h6M7 10h4"
-                            stroke="#D1FF19"
-                            strokeWidth="1.4"
-                            strokeLinecap="round"
-                          />
-                          <path
-                            d="M14 18l2 2 4-4"
-                            stroke="#2A9D5C"
-                            strokeWidth="1.6"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
+                        <IconFileCheck />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div
@@ -584,26 +554,7 @@ export default function ImportExportPage() {
                           flexShrink: 0,
                         }}
                       >
-                        <svg
-                          width="13"
-                          height="13"
-                          viewBox="0 0 13 13"
-                          fill="none"
-                        >
-                          <path
-                            d="M6.5 1v8M3 6.5l3.5 3.5 3.5-3.5"
-                            stroke="#111"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M1 11h11"
-                            stroke="#111"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                          />
-                        </svg>
+                        <IconDownload size={13} />
                         Download Template
                       </button>
                     </div>
@@ -783,26 +734,7 @@ export default function ImportExportPage() {
                         flexShrink: 0,
                       }}
                     >
-                      <svg
-                        width="22"
-                        height="22"
-                        viewBox="0 0 22 22"
-                        fill="none"
-                      >
-                        <path
-                          d="M11 14V4M7 8l4-4 4 4"
-                          stroke={dragOver ? "#D1FF19" : "#aaa"}
-                          strokeWidth="1.7"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M3 17h16"
-                          stroke={dragOver ? "#D1FF19" : "#aaa"}
-                          strokeWidth="1.7"
-                          strokeLinecap="round"
-                        />
-                      </svg>
+                      <IconUpload color={dragOver ? "#D1FF19" : "#aaa"} />
                     </div>
                     <div style={{ textAlign: "center" }}>
                       <div
@@ -1151,26 +1083,7 @@ export default function ImportExportPage() {
                                         gap: 4,
                                       }}
                                     >
-                                      <svg
-                                        width="10"
-                                        height="10"
-                                        viewBox="0 0 10 10"
-                                        fill="none"
-                                      >
-                                        <circle
-                                          cx="5"
-                                          cy="5"
-                                          r="4.5"
-                                          stroke="#C04040"
-                                          strokeWidth="1"
-                                        />
-                                        <path
-                                          d="M5 3v2.5M5 7h.01"
-                                          stroke="#C04040"
-                                          strokeWidth="1.2"
-                                          strokeLinecap="round"
-                                        />
-                                      </svg>
+                                      <IconAlertCircle size={10} />
                                       {e}
                                       {ei <
                                         (row.serverErrors ?? []).length - 1 && (
@@ -1294,20 +1207,7 @@ export default function ImportExportPage() {
                             flexShrink: 0,
                           }}
                         >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                          >
-                            <path
-                              d="M3 8l4 4 6-6"
-                              stroke="white"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
+                          <IconCheckCircle />
                         </div>
                         <div>
                           <div
@@ -1668,27 +1568,7 @@ export default function ImportExportPage() {
                             }}
                           />
                         ) : (
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                            style={{ opacity: 0.3, flexShrink: 0 }}
-                          >
-                            <path
-                              d="M8 1v9M4 7l4 4 4-4"
-                              stroke="#111"
-                              strokeWidth="1.6"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            <path
-                              d="M2 13h12"
-                              stroke="#111"
-                              strokeWidth="1.6"
-                              strokeLinecap="round"
-                            />
-                          </svg>
+                          <IconDownload style={{ opacity: 0.3, flexShrink: 0 }} />
                         )}
                       </div>
                     ))}

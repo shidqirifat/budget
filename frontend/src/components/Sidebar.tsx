@@ -1,63 +1,37 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import IconTransactions from '@/assets/icons/IconTransactions';
+import IconAnalytics from '@/assets/icons/IconAnalytics';
+import IconCategories from '@/assets/icons/IconCategories';
+import IconEvents from '@/assets/icons/IconEvents';
+import IconDownload from '@/assets/icons/IconDownload';
 
 const NAV = [
   {
     to: '/',
     label: 'Transactions',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <rect x="1" y="2" width="14" height="2" rx="1" fill="currentColor"/>
-        <rect x="1" y="7" width="14" height="2" rx="1" fill="currentColor"/>
-        <rect x="1" y="12" width="9" height="2" rx="1" fill="currentColor"/>
-      </svg>
-    ),
+    icon: <IconTransactions />,
   },
   {
     to: '/analytics',
     label: 'Analytics',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <rect x="1" y="9" width="3" height="6" rx="1" fill="currentColor"/>
-        <rect x="6" y="5" width="3" height="10" rx="1" fill="currentColor"/>
-        <rect x="11" y="1" width="3" height="14" rx="1" fill="currentColor"/>
-      </svg>
-    ),
+    icon: <IconAnalytics />,
   },
   {
     to: '/categories',
     label: 'Categories',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor"/>
-        <rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"/>
-        <rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"/>
-        <rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor"/>
-      </svg>
-    ),
+    icon: <IconCategories />,
   },
   {
     to: '/events',
     label: 'Events',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <rect x="1" y="3" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-        <rect x="5" y="1" width="1.5" height="4" rx=".75" fill="currentColor"/>
-        <rect x="9.5" y="1" width="1.5" height="4" rx=".75" fill="currentColor"/>
-        <rect x="1" y="7" width="14" height="1.5" fill="currentColor"/>
-      </svg>
-    ),
+    icon: <IconEvents />,
   },
   {
     to: '/import-export',
     label: 'Import / Export',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M8 1v10M4 7l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M2 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      </svg>
-    ),
+    icon: <IconDownload size={16} color="currentColor" />,
   },
 ];
 
