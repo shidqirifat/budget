@@ -26,7 +26,7 @@ git pull || fail "git pull failed"
 # ── 3. Backend ────────────────────────────────────────────────────────────────
 log "Installing backend dependencies..."
 cd "$REPO_DIR/backend"
-npm install --omit=dev || fail "backend npm install failed"
+npm install || fail "backend npm install failed"
 
 log "Building backend..."
 npm run build || fail "backend build failed"
